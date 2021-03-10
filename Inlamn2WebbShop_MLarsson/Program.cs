@@ -11,7 +11,7 @@ namespace Inlamn2WebbShop_MLarsson
            
             DatabaseCreator.Create();
             Seeder.Seed();
-
+            //int userId = WebbShopAPI.LogInUser("TestClient", "Codic2021");
             // var list =  WebbShopAPI.GetCategories("h");
             //Helper.ListCategories(list);
 
@@ -19,17 +19,29 @@ namespace Inlamn2WebbShop_MLarsson
             //Helper.ListBooks(list);
 
             //var book = WebbShopAPI.GetBook(5);
-            // Helper.ListBooks(book);
+            //Helper.ListBooks(book);
+            //Console.WriteLine(WebbShopAPI.Ping(2));
 
             //var book = WebbShopAPI.GetBooks("h");
             //Helper.ListBooks(book);
 
             //var authors = WebbShopAPI.GetAuthors("a");
             //Helper.ListBooks(authors);
-            WebbShopAPI.LogInUser("TestClient", "Codic2021");
-            WebbShopAPI.BuyBook(2, 5);
+            //Console.WriteLine(WebbShopAPI.Ping(2));
+            
+            //WebbShopAPI.BuyBook(2, 5);
+            
+            //WebbShopAPI.LogOutUser(2);
 
-            //Todo: Skapa en uservariabel och skicka med i metoderna. KOlla om SessionTimer inte är mer än 15 min från LastLogin. Annars Login.
+            // WebbShopAPI.Register("Silvia Sommerlath", "kungen", "kungen");
+
+
+
+            int adminId = WebbShopAPI.LogInUser("Administrator", "CodicRulez");
+           
+            //WebbShopAPI.AddBook(adminId, "Cosmos", "Stephen Hawking", 200, 5);
+
+          
 
         }
     }
