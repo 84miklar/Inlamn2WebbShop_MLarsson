@@ -20,8 +20,8 @@ namespace Inlamn2WebbShop_MLarsson.Controllers
 
                 if (db.Users.Count() == 0)
                 {
-                    db.Users.Add(new User() { Name = "Administrator", Password = "CodicRulez", IsAdmin = true, IsActive = true});
-                    db.Users.Add(new User() { Name = "TestClient", Password = "Codic2021", IsAdmin = false, IsActive = true });
+                    db.Users.Add(new User() { Name = "Administrator", Password = "CodicRulez", IsAdmin = true, IsActive = true, SoldBooks = new List<SoldBook>()});
+                    db.Users.Add(new User() { Name = "TestClient", Password = "Codic2021", IsAdmin = false, IsActive = true, SoldBooks = new List<SoldBook>() });
                     db.SaveChanges();
                 }
 

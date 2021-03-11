@@ -42,5 +42,34 @@ namespace Inlamn2WebbShop_MLarsson
                 Console.WriteLine(book);
             
         }
+        public static void ListUsers(List<User> userList)
+        {
+            Console.WriteLine();
+            foreach (var user in userList)
+            {
+                Console.WriteLine("USER: ");
+                Console.WriteLine(user);
+                Console.Write($"Books bought: ");
+                foreach(var soldBook in user.SoldBooks)
+                {
+                    Console.WriteLine($"{soldBook.Id} - {soldBook.Title}, ");
+                }
+                Console.WriteLine();
+            }
+        }
+        public static bool DoesCategoryExist(Category cat)
+        {
+            return cat != null;
+        }
+        public static bool DoesUserExist(User user)
+        {
+            return user != null;
+        }
+
+        public static bool DoesBookExist(Book book)
+        {
+            return book != null;
+        }
+
     }
 }

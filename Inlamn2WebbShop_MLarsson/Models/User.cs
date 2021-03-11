@@ -16,11 +16,14 @@ namespace Inlamn2WebbShop_MLarsson.Models
         public string Name { get; set; }
         public string Password { get; set; }
         public DateTime LastLogin { get; set; }
-        public DateTime SessionTimer { get; set; } 
+        public DateTime SessionTimer { get; set; }
         public bool IsActive { get; set; }
         public bool IsAdmin { get; set; }
         public List<SoldBook> SoldBooks { get; set; }
 
-
+        public override string ToString()
+        {
+            return $"ID: {Id} - {Name}\nPassword: {Password}\nLast Login: {LastLogin}\nUser active: {IsActive}\nIs admin: {IsAdmin}";
+        }
     }
 }

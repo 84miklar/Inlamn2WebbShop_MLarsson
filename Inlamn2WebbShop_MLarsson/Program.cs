@@ -33,16 +33,37 @@ namespace Inlamn2WebbShop_MLarsson
             
             //WebbShopAPI.LogOutUser(2);
 
-            // WebbShopAPI.Register("Silvia Sommerlath", "kungen", "kungen");
+            //WebbShopAPI.Register("Silvia", "TheQueen", "TheQueen");
 
 
 
             int adminId = WebbShopAPI.LogInUser("Administrator", "CodicRulez");
-           
+
             //WebbShopAPI.AddBook(adminId, "Cosmos", "Stephen Hawking", 200, 5);
 
-          
+            //WebbShopAPI.SetAmount(adminId, 1, 6);
 
+            //var userList = WebbShopAPI.ListUsers(adminId);
+            //Helper.ListUsers(userList);
+
+            //var userList = WebbShopAPI.FindUser(adminId, "te");
+            //Helper.ListUsers(userList);
+
+            //WebbShopAPI.UpdateBook(adminId, 2, price: 150);
+
+            // WebbShopAPI.AddCategory(adminId, "Thriller");
+
+            //WebbShopAPI.UpdateCategory(adminId, 2, "Horror");
+
+            //WebbShopAPI.DeleteCategory(adminId, 5);
+
+            //WebbShopAPI.AddUser(adminId, "CalleG", "Knugen");
+
+            WebbShopAPI.DeleteBook(adminId, 4);
         }
+
+        //TODO: .Trim() på alla användarnamn och lösenord.
+      
+
     }
 }
