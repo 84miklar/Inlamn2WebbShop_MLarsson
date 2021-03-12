@@ -11,74 +11,77 @@ namespace Inlamn2WebbShop_MLarsson
            
             DatabaseCreator.Create();
             Seeder.Seed();
-            //int userId = WebbShopAPI.LogInUser("TestClient", "Codic2021");
-            // var list =  WebbShopAPI.GetCategories("h");
-            //Helper.ListCategories(list);
+            int userId = WebbShopAPI.LogInUser("TestClient", "Codic2021");
 
-            //var list = WebbShopAPI.GetAvailableBooks(2);
-            //Helper.ListBooks(list);
+            var list = WebbShopAPI.GetCategories("h");
+            Helper.ListCategories(list);
 
-            //var book = WebbShopAPI.GetBook(5);
-            //Helper.ListBooks(book);
-            //Console.WriteLine(WebbShopAPI.Ping(2));
+            var bookList = WebbShopAPI.GetAvailableBooks(2);
+            Helper.ListBooks(bookList);
 
-            //var book = WebbShopAPI.GetBooks("h");
-            //Helper.ListBooks(book);
+            var book = WebbShopAPI.GetBook(5);
+            Helper.ListBooks(book);
 
-            //var authors = WebbShopAPI.GetAuthors("a");
-            //Helper.ListBooks(authors);
-            //Console.WriteLine(WebbShopAPI.Ping(2));
-            
-            //WebbShopAPI.BuyBook(2, 5);
-            
-            //WebbShopAPI.LogOutUser(2);
+            Console.WriteLine(WebbShopAPI.Ping(2));
 
-            //WebbShopAPI.Register("Silvia", "TheQueen", "TheQueen");
+            var bookKey = WebbShopAPI.GetBooks("h");
+            Helper.ListBooks(bookKey);
+
+            var authors = WebbShopAPI.GetAuthors("a");
+            Helper.ListBooks(authors);
+
+            Console.WriteLine(WebbShopAPI.Ping(2));
+
+            WebbShopAPI.BuyBook(2, 2);
+
+            WebbShopAPI.LogOutUser(2);
+
+            WebbShopAPI.Register("Silvia", "TheQueen", "TheQueen");
 
 
 
             int adminId = WebbShopAPI.LogInUser("Administrator", "CodicRulez");
 
-            //WebbShopAPI.AddBook(adminId, "Cosmos", "Stephen Hawking", 200, 5);
+            WebbShopAPI.AddBook(adminId, "Cosmos", "Stephen Hawking", 200, 5);
 
-            //WebbShopAPI.SetAmount(adminId, 1, 6);
+            WebbShopAPI.SetAmount(adminId, 2, 6);
 
-            //var userList = WebbShopAPI.ListUsers(adminId);
-            //Helper.ListUsers(userList);
+            var userList = WebbShopAPI.ListUsers(adminId);
+            Helper.ListUsers(userList);
 
-            //var userList = WebbShopAPI.FindUser(adminId, "te");
-            //Helper.ListUsers(userList);
+            var userListKey = WebbShopAPI.FindUser(adminId, "te");
+            Helper.ListUsers(userListKey);
 
-            //WebbShopAPI.UpdateBook(adminId, 2, price: 150);
+            WebbShopAPI.UpdateBook(adminId, 2, price: 150);
 
-            // WebbShopAPI.AddCategory(adminId, "Thriller");
+            WebbShopAPI.AddCategory(adminId, "Thriller");
 
-            //WebbShopAPI.UpdateCategory(adminId, 2, "Horror");
+            WebbShopAPI.UpdateCategory(adminId, 2, "Terrifying");
 
-            //WebbShopAPI.DeleteCategory(adminId, 5);
+            WebbShopAPI.DeleteCategory(adminId, 5);
 
-            //WebbShopAPI.AddUser(adminId, "CalleG", "Knugen");
+            WebbShopAPI.AddUser(adminId, "CalleG", "Knugen");
 
-            //WebbShopAPI.DeleteBook(adminId, 4);
+            WebbShopAPI.DeleteBook(adminId, 4);
 
-            //VGWebbShopAPI.SoldItems(adminId);
+            VGWebbShopAPI.SoldItems(adminId);
 
-            //VGWebbShopAPI.MoneyEarned(adminId);
+            VGWebbShopAPI.MoneyEarned(adminId);
 
-            // VGWebbShopAPI.BestCostumer(adminId);
+            //VGWebbShopAPI.BestCostumer(adminId);
 
-            //VGWebbShopAPI.Promote(adminId, 2);
+            VGWebbShopAPI.Promote(adminId, 2);
 
-            //VGWebbShopAPI.Demote(adminId, 2);
+            VGWebbShopAPI.Demote(adminId, 2);
 
-            //VGWebbShopAPI.InactivateUser(adminId, 2);
+            VGWebbShopAPI.InactivateUser(adminId, 2);
 
-            //VGWebbShopAPI.ActivateUser(adminId, 2);
+            VGWebbShopAPI.ActivateUser(adminId, 2);
 
         }
 
-        //TODO: .Trim() på alla användarnamn och lösenord.
-      
+       
+
 
     }
 }

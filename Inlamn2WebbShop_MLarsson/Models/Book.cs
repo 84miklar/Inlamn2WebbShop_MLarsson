@@ -10,7 +10,6 @@ namespace Inlamn2WebbShop_MLarsson.Models
 {
     public class Book
     {
-        //ToDo: properties
         [Key]
         public int Id { get; set; }
         public string Title { get; set; }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading.Tasks.Dataflow;
@@ -32,9 +33,8 @@ namespace Inlamn2WebbShop_MLarsson
         /// <returns>true om boken redan finns eller lades till korrekt, annars false.</returns>
         public static bool AddBook(int adminId, string title, string author, int price, int amount)
         {
-            var admin = db.Users.FirstOrDefault(a => a.Id == adminId && a.IsAdmin == true);
             var book = db.Books.FirstOrDefault(b => b.Title == title);
-            if (admin != null)
+            if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
             {
                 if (book != null)
                 {
@@ -60,11 +60,7 @@ namespace Inlamn2WebbShop_MLarsson
                     }
                 }
             }
-            else
-            {
-                Console.WriteLine("You are not an administrator.");
-                return false;
-            }
+            return false;
         }
 
         /// <summary>
@@ -77,9 +73,7 @@ namespace Inlamn2WebbShop_MLarsson
         /// <returns></returns>
         public static bool AddBookToCategory(int adminId, int bookId, string categoryName)
         {
-            //Todo: kolla om person finns och adminId.IsAdmin == true. KOlla om bok finns. Kolla om category finns, annars skapa (addCategory) och lägg till bok i den. Kolla om det lyckats, returnera true eller false.
-            var admin = db.Users.FirstOrDefault(a => a.Id == adminId && a.IsAdmin == true);
-            if (admin != null)
+            if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
             {
                 var book = (from b in db.Books
                             where b.Id == bookId
@@ -102,11 +96,7 @@ namespace Inlamn2WebbShop_MLarsson
                 Console.WriteLine($"Book added to category {categoryName}. ");
                 return true;
             }
-            else
-            {
-                Console.WriteLine("You are not an administrator.");
-                return false;
-            }
+            return false;
         }
 
         /// <summary>
@@ -117,12 +107,9 @@ namespace Inlamn2WebbShop_MLarsson
         /// <returns>true om kategori är tillagd, annars false</returns>
         public static bool AddCategory(int adminId, string name)
         {
-            var admin = from a in db.Users //Testar det nyare LINQ-sättet att skriva...
-                        where a.Id == adminId && a.IsAdmin == true
-                        select a;
-
-            if (admin != null)
+            if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
             {
+                //Testar på LINQ-Query istället för lambda...
                 var cat = (from c in db.Categories
                            where c.Name == name
                            select c).FirstOrDefault();
@@ -140,31 +127,23 @@ namespace Inlamn2WebbShop_MLarsson
                         Console.WriteLine($"You have added {name} as a category.");
                         return true;
                     }
-                    else
-                    {
-                        Console.WriteLine("Something went wrong...");
-                        return false;
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("No category added...");
+                    Console.WriteLine("Something went wrong...");
                     return false;
                 }
             }
-            else
-            {
-                Console.WriteLine("You are not an administrator.");
-                return false;
-
-            }
+            return false;
         }
-
+        /// <summary>
+        /// Tittar om användare är admin, lägger till användare
+        /// om lösenord inte saknas eller användarnamn inte är upptaget.
+        /// </summary>
+        /// <param name="adminId"></param>
+        /// <param name="name"></param>
+        /// <param name="password"></param>
+        /// <returns>true om ny användare är tillagd, annars false</returns>
         public static bool AddUser(int adminId, string name, string password = "")
         {
-            var admin = db.Users.FirstOrDefault(a => a.Id == adminId && a.IsAdmin == true);
-
-            if (admin != null)
+            if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
             {
                 if (password == "")
                 {
@@ -185,20 +164,11 @@ namespace Inlamn2WebbShop_MLarsson
                         Console.WriteLine($"You have added a new user: {name.Trim()} - {password}");
                         return true;
                     }
-                    else
-                    {
-                        return false;
-                    }
+                    return false;
                 }
             }
-            else
-            {
-                Console.WriteLine("You are not an administrator.");
-                return false;
-            }
-
+            return false;
         }
-
         /// <summary>
         /// Metod för att köpa en bok. Kollar om användaren är inloggad och att boken finns.
         /// Kopierar boken till tabellen SoldBooks och skapar koppling mellan den och användaren.
@@ -221,7 +191,7 @@ namespace Inlamn2WebbShop_MLarsson
                 }
                 var soldBook = new SoldBook() { Title = book.Title, Author = book.Author, Price = book.Price, PurchasedDate = DateTime.Now, Categories = new List<Category>(), Users = new List<User>() };
                 soldBook.Users.Add(user);
-               
+
                 foreach (var cat in book.Categories)
                 {
                     soldBook.Categories.Add(cat);
@@ -229,14 +199,20 @@ namespace Inlamn2WebbShop_MLarsson
                 db.SoldBooks.Add(soldBook);
                 db.Update(user);
                 db.SaveChanges();
+                Console.WriteLine($"You have bought {soldBook.Title}\n");
             }
             return user;
         }
 
+        /// <summary>
+        ///  Tittar om användare är admin, tar bort bok om den finns.
+        /// </summary>
+        /// <param name="adminId"></param>
+        /// <param name="bookId"></param>
+        /// <returns>true om boken är borttagen, annars false.</returns>
         public static bool DeleteBook(int adminId, int bookId)
         {
-            var admin = db.Users.FirstOrDefault(a => a.Id == adminId && a.IsAdmin == true);
-            if (admin != null)
+            if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
             {
                 var book = db.Books.FirstOrDefault(b => b.Id == bookId);
                 if (book != null)
@@ -244,41 +220,31 @@ namespace Inlamn2WebbShop_MLarsson
                     while (book.Amount > 0)
                     {
                         book.Amount--;
-
                     }
                     db.Books.Remove(book);
                     db.SaveChanges();
 
-                    if (Helper.DoesBookExist(db.Books.FirstOrDefault(b => b.Id == bookId)))
-                    {
-                        Console.WriteLine("Something went wrong...");
-                        return false;
-                    }
-                    else
+                    if (!Helper.DoesBookExist(db.Books.FirstOrDefault(b => b.Id == bookId)))
                     {
                         Console.WriteLine($"You have deleted book {book.Title}");
                         return true;
                     }
-
                 }
-                else
-                {
-                    Console.WriteLine("You can't delete this book...");
-                    return false;
-                }
-            }
-            else
-            {
-                Console.WriteLine("You are not an administrator.");
+                Console.WriteLine("Something went wrong...");
                 return false;
             }
+            return false;
         }
 
+        /// <summary>
+        ///  Tittar om användare är admin, tar bort kategori om den finns.
+        /// </summary>
+        /// <param name="adminId"></param>
+        /// <param name="categoryId"></param>
+        /// <returns>true om kategorin är borttagen, annars false.</returns>
         public static bool DeleteCategory(int adminId, int categoryId)
         {
-            var admin = db.Users.FirstOrDefault(a => a.Id == adminId && a.IsAdmin == true);
-
-            if (admin != null)
+            if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
             {
                 var cat = db.Categories.Include(b => b.Books).FirstOrDefault(c => c.Id == categoryId);
 
@@ -286,25 +252,16 @@ namespace Inlamn2WebbShop_MLarsson
                 {
                     db.Categories.Remove(cat);
                     db.SaveChanges();
-                    if (Helper.DoesCategoryExist(db.Categories.FirstOrDefault(c => c.Id == categoryId)))
-                    {
-                        Console.WriteLine("Something went wrong...");
-                        return false;
-                    }
-                    else
+                    if (!Helper.DoesCategoryExist(db.Categories.FirstOrDefault(c => c.Id == categoryId)))
                     {
                         Console.WriteLine($"You have deleted category {cat.Name}");
                         return true;
                     }
                 }
-                Console.WriteLine("You can't delete this category...");
+                Console.WriteLine("Something went wrong...");
                 return false;
             }
-            else
-            {
-                Console.WriteLine("You are not an administrator.");
-                return false;
-            }
+            return false;
         }
 
         /// <summary>
@@ -317,15 +274,11 @@ namespace Inlamn2WebbShop_MLarsson
         public static List<User> FindUser(int adminId, string keyword)
         {
             var admin = db.Users.FirstOrDefault(a => a.Id == adminId && a.IsAdmin == true);
-            if (admin != null)
+            if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
             {
                 return db.Users.Include(s => s.SoldBooks).Where(u => u.Name.Contains(keyword)).OrderBy(o => o.Name).ToList();
             }
-            else
-            {
-                Console.WriteLine("You are not an administrator.");
-                return null;
-            }
+            return null;
         }
 
         /// <summary>
@@ -339,6 +292,8 @@ namespace Inlamn2WebbShop_MLarsson
 
             return db.Books.Include("Categories").Where(b => b.Author.Contains(keyword)).OrderBy(a => a.Author).ToList();
         }
+
+
         /// <summary>
         /// Hämtar böcker in en viss kategori baserad på kategori-id, 
         /// och antal böcker fler än 0.
@@ -376,6 +331,7 @@ namespace Inlamn2WebbShop_MLarsson
         {
             return db.Books.Include("Categories").Where(b => b.Title.Contains(keyword)).OrderBy(o => o.Title).ToList();
         }
+
         /// <summary>
         /// Hämtar kategorier som innehåller valt nyckelord.
         /// </summary>
@@ -396,28 +352,19 @@ namespace Inlamn2WebbShop_MLarsson
         }
 
         /// <summary>
-        /// Tittar om användare är admin, 
+        /// Tittar om användare är admin,
         /// och listar alla användare som finns.
         /// </summary>
         /// <param name="adminId"></param>
         /// <returns>Lista på användare</returns>
         public static List<User> ListUsers(int adminId)
         {
-            var admin = db.Users.FirstOrDefault(a => a.Id == adminId && a.IsAdmin == true);
             var userList = new List<User>();
-            if (admin != null)
+            if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
             {
-                foreach (var user in db.Users)
-                {
-                    userList.Add(user);
-                }
-                return userList;
+                return db.Users.OrderBy(u => u.Name).ToList();
             }
-            else
-            {
-                Console.WriteLine("You are not an administrator.");
-                return null;
-            }
+            return null;
         }
 
         /// <summary>
@@ -428,12 +375,8 @@ namespace Inlamn2WebbShop_MLarsson
         /// <returns>Användar-id. 0 om ingen användare finns.</returns>
         public static int LogInUser(string userName, string password)
         {
-            var user = db.Users.FirstOrDefault(u => u.Name == userName && u.Password == password && u.IsActive == true);
-            if (user == null)
-            {
-                return 0;
-            }
-            else
+            var user = db.Users.FirstOrDefault(u => u.Name == userName.Trim() && u.Password == password && u.IsActive == true);
+            if (user != null)
             {
                 user.LastLogin = DateTime.Now;
                 user.SessionTimer = DateTime.Now;
@@ -442,6 +385,7 @@ namespace Inlamn2WebbShop_MLarsson
                 Console.WriteLine("You have successfully logged in.");
                 return user.Id;
             }
+            return 0;
         }
 
         /// <summary>
@@ -451,11 +395,7 @@ namespace Inlamn2WebbShop_MLarsson
         public static void LogOutUser(int id)
         {
             var user = db.Users.FirstOrDefault(u => u.Id == id && u.SessionTimer > DateTime.Now.AddMinutes(-10));
-            if (user == null)
-            {
-
-            }
-            else
+            if (user != null)
             {
                 user.SessionTimer = DateTime.MinValue;
                 db.Users.Update(user);
@@ -473,7 +413,7 @@ namespace Inlamn2WebbShop_MLarsson
             var user = db.Users.FirstOrDefault(u => u.Id == userId);
             if (user.SessionTimer! > DateTime.Now.AddMinutes(-10))
             {
-                return "Pong";
+                return "\nPong\n";
             }
             else
             {
@@ -496,18 +436,16 @@ namespace Inlamn2WebbShop_MLarsson
                 return false;
             }
 
-            var checkUser = db.Users.FirstOrDefault(u => u.Name == name);
-            if (checkUser != null)
+            if (Helper.DoesUserExist(db.Users.FirstOrDefault(u => u.Name == name.Trim())))
             {
                 Console.WriteLine("User already exists! Try another user name.");
                 return false;
             }
             else
             {
-                db.Users.Add(new User() { Name = name, Password = password, IsActive = true, IsAdmin = false, SoldBooks = new List<SoldBook>() });
+                db.Users.Add(new User() { Name = name.Trim(), Password = password, IsActive = true, IsAdmin = false, SoldBooks = new List<SoldBook>() });
                 db.SaveChanges();
-                var user = db.Users.FirstOrDefault(u => u.Name == name);
-                if (user != null)
+                if (Helper.DoesUserExist(db.Users.FirstOrDefault(u => u.Name == name.Trim())))
                 {
                     Console.WriteLine("You are now registred in our shop. Please login to start buying books.");
                     return true;
@@ -527,9 +465,8 @@ namespace Inlamn2WebbShop_MLarsson
         /// <param name="amount"></param>
         public static void SetAmount(int adminId, int bookId, int amount)
         {
-            var admin = db.Users.FirstOrDefault(a => a.Id == adminId && a.IsAdmin == true);
             var book = db.Books.FirstOrDefault(b => b.Id == bookId);
-            if (admin != null)
+            if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
             {
                 if (book != null)
                 {
@@ -540,14 +477,10 @@ namespace Inlamn2WebbShop_MLarsson
                 else
                 {
                     Console.WriteLine("No book was found...");
-
                 }
             }
-            else
-            {
-                Console.WriteLine("You are not an administrator.");
-            }
         }
+
         /// <summary>
         /// Tittar om användare är admin, updaterar bok med ifylld info.
         /// </summary>
@@ -559,9 +492,7 @@ namespace Inlamn2WebbShop_MLarsson
         /// <returns>true om boken är uppdaterad, annars false</returns>
         public static bool UpdateBook(int adminId, int bookId, string title = "", string author = "", int price = 0)
         {
-            //Todo: kolla om person finns och adminId.IsAdmin == true. Kolla om boken finns. Ändra allt som inte har "" eller 0. Kolla om det lyckats, returnera true eller false.
-            var admin = db.Users.FirstOrDefault(a => a.Id == adminId && a.IsAdmin == true);
-            if (admin != null)
+            if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
             {
                 var book = db.Books.FirstOrDefault(b => b.Id == bookId);
                 if (book != null)
@@ -580,11 +511,7 @@ namespace Inlamn2WebbShop_MLarsson
                     return false;
                 }
             }
-            else
-            {
-                Console.WriteLine("You are not an administrator.");
-                return false;
-            }
+            return false;
         }
         /// <summary>
         /// Kollar om användare är admin, byter namn på kategori om id finns.
@@ -595,8 +522,7 @@ namespace Inlamn2WebbShop_MLarsson
         /// <returns>true om namnet är ändrat, annars false.</returns>
         public static bool UpdateCategory(int adminId, int categoryId, string newName)
         {
-            var admin = db.Users.FirstOrDefault(a => a.Id == adminId && a.IsAdmin == true);
-            if (admin != null)
+            if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
             {
                 var cat = db.Categories.FirstOrDefault(c => c.Id == categoryId);
                 if (cat != null)
@@ -604,29 +530,17 @@ namespace Inlamn2WebbShop_MLarsson
                     cat.Name = newName;
                     db.Update(cat);
                     db.SaveChanges();
-
                     if (Helper.DoesCategoryExist(db.Categories.FirstOrDefault(c => c.Name == newName && c.Id == categoryId)))
                     {
                         Console.WriteLine("You have updated a category.");
                         return true;
                     }
-                    else
-                    {
-                        Console.WriteLine("Something went wrong...");
-                        return false;
-                    }
                 }
-                else
-                {
-                    Console.WriteLine("No matching category found!");
-                    return false;
-                }
+                Console.WriteLine("Something went wrong...");
+
             }
-            else
-            {
-                Console.WriteLine("You are not an administrator.");
-                return false;
-            }
+            return false;
+
         }
     }
 }
