@@ -221,7 +221,7 @@ namespace Inlamn2WebbShop_MLarsson
                 }
                 var soldBook = new SoldBook() { Title = book.Title, Author = book.Author, Price = book.Price, PurchasedDate = DateTime.Now, Categories = new List<Category>(), Users = new List<User>() };
                 soldBook.Users.Add(user);
-                user.SoldBooks.Add(soldBook);
+               
                 foreach (var cat in book.Categories)
                 {
                     soldBook.Categories.Add(cat);

@@ -59,7 +59,22 @@ namespace Inlamn2WebbShop_MLarsson
 
             //WebbShopAPI.AddUser(adminId, "CalleG", "Knugen");
 
-            WebbShopAPI.DeleteBook(adminId, 4);
+            //WebbShopAPI.DeleteBook(adminId, 4);
+
+            //VGWebbShopAPI.SoldItems(adminId);
+
+            //VGWebbShopAPI.MoneyEarned(adminId);
+
+            // VGWebbShopAPI.BestCostumer(adminId);
+
+            //VGWebbShopAPI.Promote(adminId, 2);
+
+            //VGWebbShopAPI.Demote(adminId, 2);
+
+            //VGWebbShopAPI.InactivateUser(adminId, 2);
+
+            //VGWebbShopAPI.ActivateUser(adminId, 2);
+
         }
 
         //TODO: .Trim() på alla användarnamn och lösenord.
