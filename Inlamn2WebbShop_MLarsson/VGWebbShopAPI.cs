@@ -47,41 +47,18 @@ namespace Inlamn2WebbShop_MLarsson
         /// Visar den kund som köpt flest böcker.
         /// </summary>
         /// <param name="adminId"></param>
-        public static void BestCostumer(int adminId) //TODO: best costumer
+        public static User BestCustomer(int adminId) //TODO: best costumer
         {
             if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
             {
-                var hej = db.Users.Include(u => u.SoldBooks).Where(u => u.SoldBooks.Count() > 0).OrderBy(o => o.Name).Distinct().Take(1).ToList();
-                foreach (var item in hej)
-                {
-                    Console.WriteLine(item);
-                }
-
-                var test = db.Users.Include(u => u.SoldBooks).Where(u => u.SoldBooks.Count() > 0);
-
-
-                var bestBuy = from user in db.Users.Include(u => u.SoldBooks)
-                              where user.SoldBooks.Count() > 0
-                              group user by user.Name into customer
-                              select new
-                              {
-                                  Name = customer.Key,
-                                  TotalOrders = customer.Count()
-                              };
-                //  .Take(1).ToList();
-                foreach (var item in bestBuy)
-                {
-                    Console.WriteLine(item);
-                }
+                var customer = db.Users.Include(s => s.SoldBooks).OrderByDescending(b => b.SoldBooks.Count()).FirstOrDefault();
+                
+                Console.WriteLine($"BEST CUSTOMER:\nAmount of books bought: {customer.SoldBooks.Count()}");
+                return customer;
             }
+            return null;
         }
-        /*SELECT distinct top 1 Name As Kunder, Count (Name) as antalKöp
-
-FROM            dbo.SoldBooks INNER JOIN
-                         dbo.SoldBookUser ON dbo.SoldBooks.Id = dbo.SoldBookUser.SoldBooksId INNER JOIN
-                        dbo.Users ON dbo.SoldBookUser.UsersId = dbo.Users.Id
-						 group by Name*/
-
+       
         /// <summary>
         /// Gör en administratör till vanlig användare.
         /// </summary>

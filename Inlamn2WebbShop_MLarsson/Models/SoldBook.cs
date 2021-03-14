@@ -5,7 +5,10 @@ using System.Text;
 
 namespace Inlamn2WebbShop_MLarsson.Models
 {
-   public class SoldBook
+    /// <summary>
+    /// Klassen representerar tabellen SoldBook i databasen.
+    /// </summary>
+    public class SoldBook
     {
         [Key]
         public int Id { get; set; }

@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Inlamn2WebbShop_MLarsson.Database
 {
     /// <summary>
+    /// Text och metod av Marcus Medina.
     /// En klass som talar om för vårt program att
     ///uppdatera databasen och köra alla migrationer.
     /// </summary>

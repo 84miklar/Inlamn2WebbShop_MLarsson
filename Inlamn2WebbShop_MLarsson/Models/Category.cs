@@ -5,7 +5,10 @@ using System.Text;
 
 namespace Inlamn2WebbShop_MLarsson.Models
 {
-  public  class Category
+    /// <summary>
+    /// Klassen representerar tabellen Category i databasen.
+    /// </summary>
+    public class Category
     {
 
         [Key]

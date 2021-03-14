@@ -8,6 +8,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Inlamn2WebbShop_MLarsson.Models
 {
+    /// <summary>
+    /// Klassen representerar tabellen Book i databasen.
+    /// </summary>
     public class Book
     {
         [Key]

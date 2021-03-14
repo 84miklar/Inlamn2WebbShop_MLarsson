@@ -78,7 +78,7 @@ namespace Inlamn2WebbShop_MLarsson
                 var book = (from b in db.Books
                             where b.Id == bookId
                             select b).FirstOrDefault();
-                var cat = (from c in db.Categories
+                var cat = (from c in db.Categories.Include(b=>b.Books)
                            where c.Name == categoryName
                            select c).FirstOrDefault();
                 if (cat == null)
@@ -342,6 +342,21 @@ namespace Inlamn2WebbShop_MLarsson
             return db.Categories.Where(c => c.Name.Contains(keyword)).OrderBy(c => c.Name).ToList();
         }
 
+        /// <summary>
+        /// Hämtar böcker i en kategori
+        /// </summary>
+        /// <param name="categoryId"></param>
+        /// <returns>Lista på böcker i en kategori</returns>
+        public static List<Book> GetCategory(int categoryId) 
+        {
+            List<Book> bookList = new List<Book>();
+            var catList = db.Categories.Include(b => b.Books).FirstOrDefault(c=>c.Id== categoryId);
+            foreach(var book in catList.Books)
+            {
+                bookList.Add(book);
+            }
+            return bookList;
+        }
         /// <summary>
         /// Hämtar alla kategorier.
         /// </summary>

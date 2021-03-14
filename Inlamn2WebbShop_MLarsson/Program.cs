@@ -8,79 +8,171 @@ namespace Inlamn2WebbShop_MLarsson
     {
         static void Main(string[] args)
         {
-           
-            DatabaseCreator.Create();
-            Seeder.Seed();
-            int userId = WebbShopAPI.LogInUser("TestClient", "Codic2021");
+            ////Skapa databas och fyll på tabeller.
+            // DatabaseCreator.Create();
+            // Seeder.Seed();
 
-            var list = WebbShopAPI.GetCategories("h");
-            Helper.ListCategories(list);
+            // #region Go1-User
+            // //Logga in 
+            // int userId = WebbShopAPI.LogInUser("TestClient", "Codic2021");
 
-            var bookList = WebbShopAPI.GetAvailableBooks(2);
-            Helper.ListBooks(bookList);
+            // //Fråga efter kategorier
+            // var list = WebbShopAPI.GetCategories();
+            // Helper.ListCategories(list);
 
-            var book = WebbShopAPI.GetBook(5);
-            Helper.ListBooks(book);
+            // //Välj kategori Horror
+            // var category = WebbShopAPI.GetCategory(2);
+            // Helper.ListCategory(category);
 
-            Console.WriteLine(WebbShopAPI.Ping(2));
+            // //Skicka Ping
+            // Console.WriteLine(WebbShopAPI.Ping(2));
 
-            var bookKey = WebbShopAPI.GetBooks("h");
-            Helper.ListBooks(bookKey);
+            // //Lista böcker i kategorin Horror, med fler än 0 i antal.
+            // var bookList = WebbShopAPI.GetAvailableBooks(2);
+            // Helper.ListBooks(bookList);
 
-            var authors = WebbShopAPI.GetAuthors("a");
-            Helper.ListBooks(authors);
+            // //Presentera all info boken Dr Sleep
+            // var book = WebbShopAPI.GetBook(3);
+            // Helper.ListBooks(book);
 
-            Console.WriteLine(WebbShopAPI.Ping(2));
+            // //Köp Dr Sleep
+            // WebbShopAPI.BuyBook(userId, 3);
 
-            WebbShopAPI.BuyBook(2, 2);
+            // //Skicka Ping
+            // Console.WriteLine(WebbShopAPI.Ping(2));
 
-            WebbShopAPI.LogOutUser(2);
+            // //Presentera all info boken Dr Sleep för att kontrollera antal
+            // var checkAmount = WebbShopAPI.GetBook(3);
+            // Helper.ListBooks(checkAmount);
 
-            WebbShopAPI.Register("Silvia", "TheQueen", "TheQueen");
+            // //Logga ut användare.
+            // WebbShopAPI.LogOutUser(userId);
+
+            // Console.ReadLine();
+            // #endregion Go1-User
 
 
+            // #region Go2-Admin
+            // //Logga in administratör
+            // int adminId = WebbShopAPI.LogInUser("Administrator", "CodicRulez");
 
-            int adminId = WebbShopAPI.LogInUser("Administrator", "CodicRulez");
+            // //Skapa kategori
+            // WebbShopAPI.AddCategory(adminId, "Facts");
 
-            WebbShopAPI.AddBook(adminId, "Cosmos", "Stephen Hawking", 200, 5);
+            // //Skapa en bok
+            // WebbShopAPI.AddBook(adminId, "A Brief History Of Time", "Stephen Hawking", 200, 5);
 
-            WebbShopAPI.SetAmount(adminId, 2, 6);
+            // //Skicka Ping
+            // Console.WriteLine(WebbShopAPI.Ping(2));
 
-            var userList = WebbShopAPI.ListUsers(adminId);
-            Helper.ListUsers(userList);
+            // //Lägg till bok i kategori
+            // WebbShopAPI.AddBookToCategory(adminId, 6, "Facts");
 
-            var userListKey = WebbShopAPI.FindUser(adminId, "te");
-            Helper.ListUsers(userListKey);
+            // //Logga ut användare.
+            // WebbShopAPI.LogOutUser(1);
 
-            WebbShopAPI.UpdateBook(adminId, 2, price: 150);
+            // Console.ReadLine();
 
-            WebbShopAPI.AddCategory(adminId, "Thriller");
+            // #endregion Go2-Admin
 
-            WebbShopAPI.UpdateCategory(adminId, 2, "Terrifying");
 
-            WebbShopAPI.DeleteCategory(adminId, 5);
+            // #region Go3-Admin
+            // //Logga in administratör
+            // adminId = WebbShopAPI.LogInUser("Administrator", "CodicRulez");
 
-            WebbShopAPI.AddUser(adminId, "CalleG", "Knugen");
+            // //Lägg till ny användare
+            // WebbShopAPI.AddUser(adminId, "CalleG", "Knugen");
 
-            WebbShopAPI.DeleteBook(adminId, 4);
+            // //Logga ut användare.
+            // WebbShopAPI.LogOutUser(adminId);
 
-            VGWebbShopAPI.SoldItems(adminId);
+            // Console.ReadLine();
 
-            VGWebbShopAPI.MoneyEarned(adminId);
+            // #endregion Go3-Admin
 
-            //VGWebbShopAPI.BestCostumer(adminId);
+            // #region Go4-User
+            // //Registrera ny användare
+            // WebbShopAPI.Register("Silvia", "TheQueen", "TheQueen");
 
-            VGWebbShopAPI.Promote(adminId, 2);
+            ////Logga in 
+            //int _userId = WebbShopAPI.LogInUser("Silvia", "TheQueen");
 
-            VGWebbShopAPI.Demote(adminId, 2);
+            ////Lista kategorier efter keyword
+            //var cat = WebbShopAPI.GetCategories("h");
+            //Helper.ListCategories(cat);
 
-            VGWebbShopAPI.InactivateUser(adminId, 2);
+            ////Lista böcker efter keyword
+            //var bookKey = WebbShopAPI.GetBooks("C");
+            //Helper.ListBooks(bookKey);
 
-            VGWebbShopAPI.ActivateUser(adminId, 2);
+            //WebbShopAPI.BuyBook(_userId, 1);
 
+            //WebbShopAPI.BuyBook(_userId, 3);
+
+            ////Lista alla böcker utefter författar-keyword 
+            //var authors = WebbShopAPI.GetAuthors("do");
+            //Helper.ListBooks(authors);
+
+            ////Logga ut användare.
+            //WebbShopAPI.LogOutUser(_userId);
+
+            // Console.ReadLine();
+            // #endregion Go4-User
+
+
+            // #region Go5- Admin
+            // //Logga in administratör
+            int _adminId = WebbShopAPI.LogInUser("Administrator", "CodicRulez");
+
+           // //Fyll på nya böcker
+           // WebbShopAPI.SetAmount(adminId, 2, 6);
+
+           // //Lista alla användare
+           // var userList = WebbShopAPI.ListUsers(adminId);
+           // Helper.ListUsers(userList);
+
+           // //Hitta användare baserat på keyword
+           // var userListKey = WebbShopAPI.FindUser(adminId, "te");
+           // Helper.ListUsers(userListKey);
+
+           // //Uppdatera en bok
+           // WebbShopAPI.UpdateBook(adminId, 2, price: 150);
+                        
+           // //Uppdatera en kategori
+           // WebbShopAPI.UpdateCategory(adminId, 2, "Thriller");
+
+           // //Skapa kategori
+           // WebbShopAPI.AddCategory(adminId, "Children");
+
+           // //Ta bort kategori
+           // WebbShopAPI.DeleteCategory(adminId, 6);
+
+           // //Ta bort bok
+           // WebbShopAPI.DeleteBook(adminId, 4);
+
+           // //Lista alla sålda böcker
+           // VGWebbShopAPI.SoldItems(adminId);
+
+           // //Visa totalsumma av sålda böcker
+           // VGWebbShopAPI.MoneyEarned(adminId);
+
+                 var customer = VGWebbShopAPI.BestCustomer(_adminId);
+              Helper.ListUser(customer);
+            
+           // VGWebbShopAPI.Promote(adminId, 2);
+
+           // VGWebbShopAPI.Demote(adminId, 2);
+
+           // VGWebbShopAPI.InactivateUser(adminId, 2);
+
+           // VGWebbShopAPI.ActivateUser(adminId, 2);
+
+           // //Logga ut användare.
+           // WebbShopAPI.LogOutUser(adminId);
+            //#endregion Go5-Admin
         }
 
-       
+
 
 
     }

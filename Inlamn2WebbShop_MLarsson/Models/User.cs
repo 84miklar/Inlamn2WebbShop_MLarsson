@@ -6,7 +6,7 @@ using System.Text;
 namespace Inlamn2WebbShop_MLarsson.Models
 {
     /// <summary>
-    /// Kundtabell
+    /// Klassen representerar tabellen User i databasen.
     /// </summary>
     public class User
     {
