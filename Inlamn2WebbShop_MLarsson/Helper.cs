@@ -9,115 +9,32 @@ namespace Inlamn2WebbShop_MLarsson
     public static class Helper
     {
         /// <summary>
-        /// Listar alla kategorier i en kategorilista
+        /// Hjälpmetod för att se om en användare är administratör.
         /// </summary>
-        /// <param name="categories"></param>
-        public static void ListCategories(List<Category> categories)
+        /// <param name="user"></param>
+        /// <returns>True om användare är admininstratör, annars false.</returns>
+        public static bool CheckIfAdmin(User user)
         {
-            using (var db = new WebbShopContext())
+            Console.WriteLine();
+            if (user.IsAdmin)
             {
-                Console.WriteLine("\nCATEGORIES: ");
-                foreach (var cat in categories)
-                {
-                    Console.WriteLine(cat.Name);
-                }
-                Console.WriteLine();
+                return true;
+            }
+            else
+            {
+                Console.WriteLine("You are not an administrator.");
+                return false;
             }
         }
 
         /// <summary>
-        /// Listar alla böcker i en kategori.
-        /// </summary>
-        /// <param name="books"></param>
-        public static void ListCategory(List<Book> books)
-        {
-            using (var db = new WebbShopContext())
-            {
-                    Console.WriteLine($"\nBOOKS IN CATEGORY: ");
-
-                foreach (var book in books)
-                {
-
-                    foreach (var cat in book.Categories)
-                    {
-                        Console.WriteLine($"{cat.Name} - {book.Title}");
-                    }
-                }
-                Console.WriteLine();
-            }
-        }
-
-        /// <summary>
-        /// Listar alla böcker i en boklista
-        /// </summary>
-        /// <param name="books"></param>
-        public static void ListBooks(List<Book> books)
-        {
-            foreach (var book in books)
-            {
-                foreach (var cat in book.Categories)
-                {
-                    Console.Write("Category: ");
-                    Console.WriteLine($"{cat.Name} ");
-                }
-                Console.WriteLine(book);
-            }
-        }
-
-        /// <summary>
-        /// Presenterar en vald bok och dess kategori.
+        /// Hjälpmetod för att se om en bok finns.
         /// </summary>
         /// <param name="book"></param>
-        public static void ListBooks(Book book)
+        /// <returns>True om bok finns, annars false.</returns>
+        public static bool DoesBookExist(Book book)
         {
-
-            foreach (var cat in book.Categories)
-            {
-                Console.Write("Category: ");
-                Console.WriteLine($"{cat.Name} ");
-            }
-            Console.WriteLine(book);
-
-        }
-
-        /// <summary>
-        /// Listar alla användare i en användarlista, inklusive admin.
-        /// </summary>
-        /// <param name="userList"></param>
-        public static void ListUsers(List<User> userList)
-        {
-            Console.WriteLine();
-            foreach (var user in userList)
-            {
-                Console.WriteLine("USER: ");
-                Console.WriteLine(user);
-                if (user.SoldBooks != null)
-                {
-                    Console.Write($"Books bought: ");
-                    foreach (var soldBook in user.SoldBooks)
-                    {
-                        Console.WriteLine($"{soldBook.Id} - {soldBook.Title}, ");
-                    }
-                    Console.WriteLine();
-                }
-            }
-        }
-        public static void ListUser(User user)
-        {
-            Console.WriteLine();
-           
-                Console.WriteLine("USER: ");
-                Console.WriteLine(user);
-                if (user.SoldBooks != null)
-                {
-                    Console.Write($"Books bought: ");
-                    foreach (var soldBook in user.SoldBooks)
-                    {
-                        Console.Write($"{soldBook.Title}, ");
-                    }
-                    Console.WriteLine();
-                }
-            
+            return book != null;
         }
 
         /// <summary>
@@ -139,34 +56,5 @@ namespace Inlamn2WebbShop_MLarsson
         {
             return user != null;
         }
-
-        /// <summary>
-        /// Hjälpmetod för att se om en bok finns.
-        /// </summary>
-        /// <param name="book"></param>
-        /// <returns>True om bok finns, annars false.</returns>
-        public static bool DoesBookExist(Book book)
-        {
-            return book != null;
-        }
-
-        /// <summary>
-        /// Hjälpmetod för att se om en användare är administratör.
-        /// </summary>
-        /// <param name="user"></param>
-        /// <returns>True om användare är admininstratör, annars false.</returns>
-        public static bool CheckIfAdmin(User user)
-        {
-            if (user.IsAdmin)
-            {
-                return true;
-            }
-            else
-            {
-                Console.WriteLine("You are not an administrator.");
-                return false;
-            }
-        }
-
     }
 }

@@ -11,6 +11,7 @@ using System.Xml.Xsl;
 using Inlamn2WebbShop_MLarsson.Controllers;
 using Inlamn2WebbShop_MLarsson.Database;
 using Inlamn2WebbShop_MLarsson.Models;
+using Inlamn2WebbShop_MLarsson.Views;
 using Microsoft.EntityFrameworkCore;
 
 namespace Inlamn2WebbShop_MLarsson
@@ -55,8 +56,7 @@ namespace Inlamn2WebbShop_MLarsson
                     }
                     else
                     {
-                        Console.WriteLine("Something went wrong...");
-                        return false;
+                        return View.SomethingWentWrong();
                     }
                 }
             }
@@ -70,8 +70,8 @@ namespace Inlamn2WebbShop_MLarsson
         /// <param name="adminId"></param>
         /// <param name="bookId"></param>
         /// <param name="categoryName"></param>
-        /// <returns></returns>
-        public static bool AddBookToCategory(int adminId, int bookId, string categoryName)
+        /// <returns>true om bok är tillagd i kategori, annars false</returns>
+        public static bool AddBookToCategory(int adminId, int bookId, int categoryId)
         {
             if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
             {
@@ -79,21 +79,17 @@ namespace Inlamn2WebbShop_MLarsson
                             where b.Id == bookId
                             select b).FirstOrDefault();
                 var cat = (from c in db.Categories.Include(b=>b.Books)
-                           where c.Name == categoryName
+                           where c.Id == categoryId
                            select c).FirstOrDefault();
-                if (cat == null)
+                
+                if (cat == null || book == null)
                 {
-                    AddCategory(adminId, categoryName);
-                }
-                if (book == null)
-                {
-                    Console.WriteLine("Something went wrong...");
-                    return false;
+                    return View.SomethingWentWrong();
                 }
                 cat.Books.Add(book);
                 db.Update(cat);
                 db.SaveChanges();
-                Console.WriteLine($"Book added to category {categoryName}. ");
+                Console.WriteLine($"Book added to category {cat.Name}. ");
                 return true;
             }
             return false;
@@ -127,8 +123,7 @@ namespace Inlamn2WebbShop_MLarsson
                         Console.WriteLine($"You have added {name} as a category.");
                         return true;
                     }
-                    Console.WriteLine("Something went wrong...");
-                    return false;
+                    return View.SomethingWentWrong();
                 }
             }
             return false;
@@ -179,17 +174,18 @@ namespace Inlamn2WebbShop_MLarsson
         public static User BuyBook(int userId, int bookId)
         {
             var user = db.Users.FirstOrDefault(u => u.Id == userId);
-            var book = db.Books.Include("Categories").FirstOrDefault(b => b.Id == bookId);
+            var book = db.Books.Include(c=>c.Categories).FirstOrDefault(b => b.Id == bookId);
 
-            if (user.SessionTimer! > DateTime.Now.AddMinutes(-10) && book.Amount > 0)
+            if (user.SessionTimer! > DateTime.Now.AddMinutes(-10) && book!=null && book.Amount > 0)
             {
                 user.SessionTimer = DateTime.Now;
-                book.Amount -= 1;
+                book.Amount --;
                 if (book.Amount < 1)
                 {
                     book.Amount = 0;
                 }
-                var soldBook = new SoldBook() { Title = book.Title, Author = book.Author, Price = book.Price, PurchasedDate = DateTime.Now, Categories = new List<Category>(), Users = new List<User>() };
+                var soldBook = new SoldBook() { Title = book.Title, Author = book.Author, Price = book.Price, 
+                                                PurchasedDate = DateTime.Now, Categories = new List<Category>(), Users = new List<User>() };
                 soldBook.Users.Add(user);
 
                 foreach (var cat in book.Categories)
@@ -199,9 +195,10 @@ namespace Inlamn2WebbShop_MLarsson
                 db.SoldBooks.Add(soldBook);
                 db.Update(user);
                 db.SaveChanges();
-                Console.WriteLine($"You have bought {soldBook.Title}\n");
+                Console.WriteLine($"\nYou have bought {soldBook.Title}\n");
             }
-            return user;
+           return user;
+
         }
 
         /// <summary>
@@ -230,8 +227,7 @@ namespace Inlamn2WebbShop_MLarsson
                         return true;
                     }
                 }
-                Console.WriteLine("Something went wrong...");
-                return false;
+                return View.SomethingWentWrong();
             }
             return false;
         }
@@ -258,8 +254,7 @@ namespace Inlamn2WebbShop_MLarsson
                         return true;
                     }
                 }
-                Console.WriteLine("Something went wrong...");
-                return false;
+                return View.SomethingWentWrong();
             }
             return false;
         }
@@ -273,7 +268,6 @@ namespace Inlamn2WebbShop_MLarsson
         /// <returns>Lista på användare</returns>
         public static List<User> FindUser(int adminId, string keyword)
         {
-            var admin = db.Users.FirstOrDefault(a => a.Id == adminId && a.IsAdmin == true);
             if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
             {
                 return db.Users.Include(s => s.SoldBooks).Where(u => u.Name.Contains(keyword)).OrderBy(o => o.Name).ToList();
@@ -289,10 +283,8 @@ namespace Inlamn2WebbShop_MLarsson
         /// <returns>Lista på böcker</returns>
         public static List<Book> GetAuthors(string keyword)
         {
-
-            return db.Books.Include("Categories").Where(b => b.Author.Contains(keyword)).OrderBy(a => a.Author).ToList();
+            return db.Books.Include(c=>c.Categories).Where(b => b.Author.Contains(keyword)).OrderBy(a => a.Author).ToList();
         }
-
 
         /// <summary>
         /// Hämtar böcker in en viss kategori baserad på kategori-id, 
@@ -302,7 +294,7 @@ namespace Inlamn2WebbShop_MLarsson
         public static List<Book> GetAvailableBooks(int categoryId)
         {
             List<Book> books = new List<Book>();
-            foreach (var cat in db.Categories.Include("Books").Where(c => c.Id == categoryId))
+            foreach (var cat in db.Categories.Include(b=>b.Books).Where(c => c.Id == categoryId))
             {
                 foreach (var book in cat.Books.Where(b => b.Amount > 0))
                 {
@@ -319,7 +311,7 @@ namespace Inlamn2WebbShop_MLarsson
         /// <returns>ett Book object. </returns>
         public static Book GetBook(int bookId)
         {
-            return db.Books.Include("Categories").FirstOrDefault(b => b.Id == bookId);
+            return db.Books.Include(c=>c.Categories).FirstOrDefault(b => b.Id == bookId);
         }
 
         /// <summary>
@@ -329,7 +321,7 @@ namespace Inlamn2WebbShop_MLarsson
         /// <returns>En lista med böcker.</returns>
         public static List<Book> GetBooks(string keyword)
         {
-            return db.Books.Include("Categories").Where(b => b.Title.Contains(keyword)).OrderBy(o => o.Title).ToList();
+            return db.Books.Include(c => c.Categories).Where(b => b.Title.Contains(keyword)).OrderBy(o => o.Title).ToList();
         }
 
         /// <summary>
@@ -340,6 +332,15 @@ namespace Inlamn2WebbShop_MLarsson
         public static List<Category> GetCategories(string keyword)
         {
             return db.Categories.Where(c => c.Name.Contains(keyword)).OrderBy(c => c.Name).ToList();
+        }
+
+        /// <summary>
+        /// Hämtar alla kategorier.
+        /// </summary>
+        /// <returns>En lista med kategorier</returns>
+        public static List<Category> GetCategories()
+        {
+            return db.Categories.OrderBy(c => c.Name).ToList();
         }
 
         /// <summary>
@@ -357,15 +358,6 @@ namespace Inlamn2WebbShop_MLarsson
             }
             return bookList;
         }
-        /// <summary>
-        /// Hämtar alla kategorier.
-        /// </summary>
-        /// <returns>En lista med kategorier</returns>
-        public static List<Category> GetCategories()
-        {
-            return db.Categories.OrderBy(c => c.Name).ToList();
-        }
-
         /// <summary>
         /// Tittar om användare är admin,
         /// och listar alla användare som finns.
@@ -397,7 +389,7 @@ namespace Inlamn2WebbShop_MLarsson
                 user.SessionTimer = DateTime.Now;
                 db.Users.Update(user);
                 db.SaveChanges();
-                Console.WriteLine("You have successfully logged in.");
+                Console.WriteLine("\nYou have successfully logged in.");
                 return user.Id;
             }
             return 0;
@@ -415,7 +407,7 @@ namespace Inlamn2WebbShop_MLarsson
                 user.SessionTimer = DateTime.MinValue;
                 db.Users.Update(user);
                 db.SaveChanges();
-                Console.WriteLine("You have successfully logged out. Welcome back.");
+                Console.WriteLine("\nYou have successfully logged out. Welcome back.");
             }
         }
         /// <summary>
@@ -445,6 +437,7 @@ namespace Inlamn2WebbShop_MLarsson
         /// <returns>True om användaren är skapad, annars false.</returns>
         public static bool Register(string name, string password, string passwordVerify)
         {
+            Console.WriteLine();
             if (password != passwordVerify)
             {
                 Console.WriteLine("Please check your password. Your passwords are not equal.");
@@ -467,8 +460,7 @@ namespace Inlamn2WebbShop_MLarsson
                 }
                 else
                 {
-                    Console.WriteLine("Something went wrong. Please try again.");
-                    return false;
+                    return View.SomethingWentWrong();
                 }
             }
         }
@@ -522,8 +514,7 @@ namespace Inlamn2WebbShop_MLarsson
                 }
                 else
                 {
-                    Console.WriteLine("No matching book found!");
-                    return false;
+                    return View.SomethingWentWrong();
                 }
             }
             return false;
@@ -551,7 +542,7 @@ namespace Inlamn2WebbShop_MLarsson
                         return true;
                     }
                 }
-                Console.WriteLine("Something went wrong...");
+                return View.SomethingWentWrong();
 
             }
             return false;

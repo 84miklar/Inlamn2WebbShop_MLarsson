@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using Inlamn2WebbShop_MLarsson.Database;
 using Inlamn2WebbShop_MLarsson.Models;
+using Inlamn2WebbShop_MLarsson.Views;
 using Microsoft.EntityFrameworkCore;
 
 namespace Inlamn2WebbShop_MLarsson
@@ -31,14 +33,13 @@ namespace Inlamn2WebbShop_MLarsson
                 {
                     user.IsActive = true;
                     db.SaveChanges();
-                    if (Helper.DoesUserExist(db.Users.FirstOrDefault(u => u.Id == userId && u.IsActive == true)))
+                    if (Helper.DoesUserExist(db.Users.FirstOrDefault(u => u.Id == userId && u.IsActive)))
                     {
-                        Console.WriteLine($"{user.Name} is now an active user.");
+                        Console.WriteLine($"\n{user.Name} is now an active user.");
                         return true;
                     }
                 }
-                Console.WriteLine("Something went wrong...");
-                return false;
+                return View.SomethingWentWrong();
             }
             return false;
         }
@@ -47,13 +48,13 @@ namespace Inlamn2WebbShop_MLarsson
         /// Visar den kund som köpt flest böcker.
         /// </summary>
         /// <param name="adminId"></param>
-        public static User BestCustomer(int adminId) //TODO: best costumer
+        public static User BestCustomer(int adminId)
         {
             if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
             {
                 var customer = db.Users.Include(s => s.SoldBooks).OrderByDescending(b => b.SoldBooks.Count()).FirstOrDefault();
                 
-                Console.WriteLine($"BEST CUSTOMER:\nAmount of books bought: {customer.SoldBooks.Count()}");
+                Console.WriteLine($"\nBEST CUSTOMER:\nAmount of books bought: {customer.SoldBooks.Count()}");
                 return customer;
             }
             return null;
@@ -67,7 +68,7 @@ namespace Inlamn2WebbShop_MLarsson
         /// <returns>true om lyckad, annars false.</returns>
         public static bool Demote(int adminId, int userId)
         {
-            var admin = db.Users.FirstOrDefault(a => a.Id == adminId && a.IsAdmin == true);
+            var admin = db.Users.FirstOrDefault(a => a.Id == adminId && a.IsAdmin);
 
             if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
             {
@@ -78,12 +79,11 @@ namespace Inlamn2WebbShop_MLarsson
                     db.SaveChanges();
                     if (Helper.DoesUserExist(db.Users.FirstOrDefault(u => u.Id == userId && u.IsAdmin == false)))
                     {
-                        Console.WriteLine($"{user.Name} is now demoted to normal user.");
+                        Console.WriteLine($"\n{user.Name} is now demoted to normal user.");
                         return true;
                     }
                 }
-                Console.WriteLine("Something went wrong...");
-                return false;
+                return View.SomethingWentWrong();
             }
             return false;
         }
@@ -105,13 +105,12 @@ namespace Inlamn2WebbShop_MLarsson
                     db.SaveChanges();
                     if (Helper.DoesUserExist(db.Users.FirstOrDefault(u => u.Id == userId && u.IsActive == false)))
                     {
-                        Console.WriteLine($"{user.Name} is now an inactivated user.");
+                        Console.WriteLine($"\n{user.Name} is now an inactivated user.");
                         return true;
                     }
 
                 }
-                Console.WriteLine("Something went wrong...");
-                return false;
+                return View.SomethingWentWrong();
             }
             return false;
         }
@@ -120,14 +119,27 @@ namespace Inlamn2WebbShop_MLarsson
         /// Visar totalsumman av alla sålda böcker.
         /// </summary>
         /// <param name="adminId"></param>
-        public static void MoneyEarned(int adminId) //TODO: Eventuellt totalsumma per boktitel. Vilken bok som säljer mest.
+        public static void MoneyEarned(int adminId) 
         {
             if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
             {
+                var bestBook = from b in db.SoldBooks
+                               group b by b.Title into g
+                               select new
+                               {
+                                   Title = g.Key,
+                                   BookSum = g.Sum(a => a.Price)
+                               };
+                
                 var totalSum = db.SoldBooks.Sum(p => p.Price);
-                Console.WriteLine();
-                Console.WriteLine("TOTAL MONEY EARNED BY SOLD BOOKS:");
+                
+                Console.WriteLine("\nTOTAL MONEY EARNED BY SOLD BOOKS:");
                 Console.WriteLine($"    {totalSum}kr");
+                foreach (var book in bestBook)
+                {
+                    Console.WriteLine($"SOLD BOOK: {book.Title} MONEY EARNED: {book.BookSum}");
+                }
+
             }
         }
 
@@ -146,14 +158,13 @@ namespace Inlamn2WebbShop_MLarsson
                 {
                     user.IsAdmin = true;
                     db.SaveChanges();
-                    if (Helper.DoesUserExist(db.Users.FirstOrDefault(u => u.Id == userId && u.IsAdmin == true)))
+                    if (Helper.DoesUserExist(db.Users.FirstOrDefault(u => u.Id == userId && u.IsAdmin)))
                     {
-                        Console.WriteLine($"{user.Name} is now promoted to administrator.");
+                        Console.WriteLine($"\n{user.Name} is now promoted to administrator.");
                         return true;
                     }
                 }
-                Console.WriteLine("Something went wrong...");
-                return false;
+                return View.SomethingWentWrong();
             }
             return false;
         }
@@ -167,7 +178,7 @@ namespace Inlamn2WebbShop_MLarsson
             if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
             {
                 Console.WriteLine();
-                Console.WriteLine("SOLD BOOKS:");
+                Console.WriteLine("\nSOLD BOOKS:");
                 foreach (var soldBook in db.SoldBooks.Include(u => u.Users))
                 {
                     Console.WriteLine($"{soldBook.Title} - Date: {soldBook.PurchasedDate}");
