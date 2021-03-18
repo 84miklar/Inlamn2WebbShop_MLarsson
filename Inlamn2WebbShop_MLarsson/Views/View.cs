@@ -74,12 +74,8 @@ namespace Inlamn2WebbShop_MLarsson.Views
         /// <param name="name"></param>
         /// <param name="password"></param>
         /// <returns>true om ny användare är tillagd, annars false</returns>
-        public static bool AddUSer(string choice, string name, string password)
+        public static bool AddUser(string choice, string name, string password)
         {
-            if (choice == "password")
-            {
-                Console.WriteLine("You need to enter a password.");
-            }
             if (choice == "user")
             {
                 Console.WriteLine("User already exists! Try another name.");
@@ -285,7 +281,7 @@ namespace Inlamn2WebbShop_MLarsson.Views
         {
             if (choice == "password")
             {
-                Console.WriteLine("Please check your password. Your passwords are not equal.");
+                Console.WriteLine("Please check your password. Your passwords are not equal or contains at least 4 letters.");
             }
             if (choice == "name")
             {

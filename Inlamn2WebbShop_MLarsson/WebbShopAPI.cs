@@ -152,27 +152,23 @@ namespace Inlamn2WebbShop_MLarsson
         /// <param name="name"></param>
         /// <param name="password"></param>
         /// <returns>true om ny användare är tillagd, annars false</returns>
-        public static bool AddUser(int adminId, string name, string password = "")
+        public static bool AddUser(int adminId, string name, string password="Codic2021")
         {
             try
             {
                 if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
                 {
-                    if (password == "")
-                    {
-                        return View.AddUSer("password", name, password);
-                    }
                     if (Helper.DoesUserExist(db.Users.FirstOrDefault(u => u.Name == name.Trim())))
                     {
-                        return View.AddUSer("user", name, password);
+                        return View.AddUser("user", name, password);
                     }
                     else
                     {
-                        db.Users.Add(new User() { Name = name.Trim(), Password = password, IsActive = true, IsAdmin = false, SoldBooks = new List<SoldBook>() });
+                        db.Users.Add(new User() { Name = name.Trim(), Password = password, SoldBooks = new List<SoldBook>() });
                         db.SaveChanges();
                         if (Helper.DoesUserExist(db.Users.FirstOrDefault(u => u.Name == name.Trim())))
                         {
-                            return View.AddUSer("add", name, password);
+                            return View.AddUser("add", name, password);
                         }
                         return View.SomethingWentWrong();
                     }
@@ -581,7 +577,7 @@ namespace Inlamn2WebbShop_MLarsson
             Console.WriteLine();
             try
             {
-                if (password != passwordVerify)
+                if (password != passwordVerify && password.Length>3)
                 {
                     return View.Register("password");
                 }
