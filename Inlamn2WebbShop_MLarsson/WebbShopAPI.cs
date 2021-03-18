@@ -34,33 +34,37 @@ namespace Inlamn2WebbShop_MLarsson
         /// <returns>true om boken redan finns eller lades till korrekt, annars false.</returns>
         public static bool AddBook(int adminId, string title, string author, int price, int amount)
         {
-            var book = db.Books.FirstOrDefault(b => b.Title == title);
-            if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
+            try
             {
-                if (book != null)
+                var book = db.Books.FirstOrDefault(b => b.Title == title);
+                if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
                 {
-                    book.Amount += amount;
-                    Console.WriteLine($"The book already exists in store, and the stock is refilled with {amount} books.");
-                    db.SaveChanges();
-                    return true;
-                }
-                else
-                {
-                    db.Books.Add(new Book() { Title = title, Author = author, Price = price, Amount = amount });
-                    db.SaveChanges();
-                    book = db.Books.FirstOrDefault(b => b.Title == title);
                     if (book != null)
                     {
-                        Console.WriteLine($"The book {title} is added to the store.");
+                        SetAmount(adminId, book.Id, amount);
+                        db.SaveChanges();
                         return true;
                     }
                     else
                     {
-                        return View.SomethingWentWrong();
+                        db.Books.Add(new Book() { Title = title, Author = author, Price = price, Amount = amount });
+                        db.SaveChanges();
+                        if (Helper.DoesBookExist(db.Books.FirstOrDefault(b => b.Title == title)))
+                        {
+                            return View.AddBook(title);
+                        }
+                        else
+                        {
+                            return View.SomethingWentWrong();
+                        }
                     }
                 }
+                return View.SomethingWentWrong();
             }
-            return false;
+            catch (Exception)
+            {
+                return View.SomethingWentWrong();
+            }
         }
 
         /// <summary>
@@ -73,26 +77,32 @@ namespace Inlamn2WebbShop_MLarsson
         /// <returns>true om bok är tillagd i kategori, annars false</returns>
         public static bool AddBookToCategory(int adminId, int bookId, int categoryId)
         {
-            if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
+            try
             {
-                var book = (from b in db.Books
-                            where b.Id == bookId
-                            select b).FirstOrDefault();
-                var cat = (from c in db.Categories.Include(b=>b.Books)
-                           where c.Id == categoryId
-                           select c).FirstOrDefault();
-                
-                if (cat == null || book == null)
+                if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
                 {
-                    return View.SomethingWentWrong();
+                    var book = (from b in db.Books
+                                where b.Id == bookId
+                                select b).FirstOrDefault();
+                    var cat = (from c in db.Categories.Include(b => b.Books)
+                               where c.Id == categoryId
+                               select c).FirstOrDefault();
+
+                    if (cat == null || book == null)
+                    {
+                        return View.SomethingWentWrong();
+                    }
+                    cat.Books.Add(book);
+                    db.Update(cat);
+                    db.SaveChanges();
+                    return View.AddBookToCategory(cat);
                 }
-                cat.Books.Add(book);
-                db.Update(cat);
-                db.SaveChanges();
-                Console.WriteLine($"Book added to category {cat.Name}. ");
-                return true;
+                return View.SomethingWentWrong();
             }
-            return false;
+            catch (Exception)
+            {
+                return View.SomethingWentWrong();
+            }
         }
 
         /// <summary>
@@ -103,30 +113,36 @@ namespace Inlamn2WebbShop_MLarsson
         /// <returns>true om kategori är tillagd, annars false</returns>
         public static bool AddCategory(int adminId, string name)
         {
-            if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
+            try
             {
-                //Testar på LINQ-Query istället för lambda...
-                var cat = (from c in db.Categories
-                           where c.Name == name
-                           select c).FirstOrDefault();
-                if (cat == null)
+                if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
                 {
-                    db.Categories.Add(new Category() { Name = name });
-                    db.SaveChanges();
-                    cat = (from c in db.Categories
-                           where c.Name == name
-                           select c).FirstOrDefault();
-                    if (Helper.DoesCategoryExist((from c in db.Categories
-                                                  where c.Name == name
-                                                  select c).FirstOrDefault()))
+                    //Testar på LINQ-Query istället för lambda...
+                    var cat = (from c in db.Categories
+                               where c.Name == name
+                               select c).FirstOrDefault();
+                    if (cat == null)
                     {
-                        Console.WriteLine($"You have added {name} as a category.");
-                        return true;
+                        db.Categories.Add(new Category() { Name = name });
+                        db.SaveChanges();
+                        cat = (from c in db.Categories
+                               where c.Name == name
+                               select c).FirstOrDefault();
+                        if (Helper.DoesCategoryExist((from c in db.Categories
+                                                      where c.Name == name
+                                                      select c).FirstOrDefault()))
+                        {
+                            return View.AddCategory(name);
+                        }
+                        return View.SomethingWentWrong();
                     }
-                    return View.SomethingWentWrong();
                 }
+                return View.SomethingWentWrong();
             }
-            return false;
+            catch (Exception)
+            {
+                return View.SomethingWentWrong();
+            }
         }
         /// <summary>
         /// Tittar om användare är admin, lägger till användare
@@ -138,31 +154,36 @@ namespace Inlamn2WebbShop_MLarsson
         /// <returns>true om ny användare är tillagd, annars false</returns>
         public static bool AddUser(int adminId, string name, string password = "")
         {
-            if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
+            try
             {
-                if (password == "")
+                if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
                 {
-                    Console.WriteLine("You need to enter a password!");
-                    return false;
-                }
-                if (Helper.DoesUserExist(db.Users.FirstOrDefault(u => u.Name == name.Trim())))
-                {
-                    Console.WriteLine("User already exists!");
-                    return false;
-                }
-                else
-                {
-                    db.Users.Add(new User() { Name = name.Trim(), Password = password, IsActive = true, IsAdmin = false, SoldBooks = new List<SoldBook>() });
-                    db.SaveChanges();
+                    if (password == "")
+                    {
+                        return View.AddUSer("password", name, password);
+                    }
                     if (Helper.DoesUserExist(db.Users.FirstOrDefault(u => u.Name == name.Trim())))
                     {
-                        Console.WriteLine($"You have added a new user: {name.Trim()} - {password}");
-                        return true;
+                        return View.AddUSer("user", name, password);
                     }
-                    return false;
+                    else
+                    {
+                        db.Users.Add(new User() { Name = name.Trim(), Password = password, IsActive = true, IsAdmin = false, SoldBooks = new List<SoldBook>() });
+                        db.SaveChanges();
+                        if (Helper.DoesUserExist(db.Users.FirstOrDefault(u => u.Name == name.Trim())))
+                        {
+                            return View.AddUSer("add", name, password);
+                        }
+                        return View.SomethingWentWrong();
+                    }
                 }
+                return View.SomethingWentWrong();
             }
-            return false;
+            catch (Exception)
+            {
+
+                return View.SomethingWentWrong();
+            }
         }
         /// <summary>
         /// Metod för att köpa en bok. Kollar om användaren är inloggad och att boken finns.
@@ -174,30 +195,47 @@ namespace Inlamn2WebbShop_MLarsson
         public static User BuyBook(int userId, int bookId)
         {
             var user = db.Users.FirstOrDefault(u => u.Id == userId);
-            var book = db.Books.Include(c=>c.Categories).FirstOrDefault(b => b.Id == bookId);
+            var book = db.Books.Include(c => c.Categories).FirstOrDefault(b => b.Id == bookId);
 
-            if (user.SessionTimer! > DateTime.Now.AddMinutes(-10) && book!=null && book.Amount > 0)
+            try
             {
-                user.SessionTimer = DateTime.Now;
-                book.Amount --;
-                if (book.Amount < 1)
+                if (user != null && user.SessionTimer! > DateTime.Now.AddMinutes(-10)
+                    && book != null && book.Amount > 0)
                 {
-                    book.Amount = 0;
-                }
-                var soldBook = new SoldBook() { Title = book.Title, Author = book.Author, Price = book.Price, 
-                                                PurchasedDate = DateTime.Now, Categories = new List<Category>(), Users = new List<User>() };
-                soldBook.Users.Add(user);
+                    user.SessionTimer = DateTime.Now;
+                    book.Amount--;
+                    if (book.Amount < 1)
+                    {
+                        book.Amount = 0;
+                    }
+                    var soldBook = new SoldBook()
+                    {
+                        Title = book.Title,
+                        Author = book.Author,
+                        Price = book.Price,
+                        PurchasedDate = DateTime.Now,
+                        Categories = new List<Category>(),
+                        Users = new List<User>()
+                    };
+                    soldBook.Users.Add(user);
 
-                foreach (var cat in book.Categories)
-                {
-                    soldBook.Categories.Add(cat);
+                    foreach (var cat in book.Categories)
+                    {
+                        soldBook.Categories.Add(cat);
+                    }
+                    db.SoldBooks.Add(soldBook);
+                    db.Update(user);
+                    db.SaveChanges();
+                    View.BuyBook(soldBook.Title); 
+                    return user;
                 }
-                db.SoldBooks.Add(soldBook);
-                db.Update(user);
-                db.SaveChanges();
-                Console.WriteLine($"\nYou have bought {soldBook.Title}\n");
+                View.SomethingWentWrong();
+                return null;
             }
-           return user;
+            catch (Exception)
+            {
+                return null;
+            }
 
         }
 
@@ -209,27 +247,33 @@ namespace Inlamn2WebbShop_MLarsson
         /// <returns>true om boken är borttagen, annars false.</returns>
         public static bool DeleteBook(int adminId, int bookId)
         {
-            if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
+            try
             {
-                var book = db.Books.FirstOrDefault(b => b.Id == bookId);
-                if (book != null)
+                if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
                 {
-                    while (book.Amount > 0)
+                    var book = db.Books.FirstOrDefault(b => b.Id == bookId);
+                    if (book != null)
                     {
-                        book.Amount--;
-                    }
-                    db.Books.Remove(book);
-                    db.SaveChanges();
+                        while (book.Amount > 0)
+                        {
+                            book.Amount--;
+                        }
+                        db.Books.Remove(book);
+                        db.SaveChanges();
 
-                    if (!Helper.DoesBookExist(db.Books.FirstOrDefault(b => b.Id == bookId)))
-                    {
-                        Console.WriteLine($"You have deleted book {book.Title}");
-                        return true;
+                        if (!Helper.DoesBookExist(db.Books.FirstOrDefault(b => b.Id == bookId)))
+                        {
+                            return View.DeleteBook(book.Title);
+                        }
                     }
+                    return View.SomethingWentWrong();
                 }
                 return View.SomethingWentWrong();
             }
-            return false;
+            catch (Exception)
+            {
+                return View.SomethingWentWrong();
+            }
         }
 
         /// <summary>
@@ -240,23 +284,30 @@ namespace Inlamn2WebbShop_MLarsson
         /// <returns>true om kategorin är borttagen, annars false.</returns>
         public static bool DeleteCategory(int adminId, int categoryId)
         {
-            if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
+            try
             {
-                var cat = db.Categories.Include(b => b.Books).FirstOrDefault(c => c.Id == categoryId);
-
-                if (cat != null && cat.Books.Count() <= 0)
+                if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
                 {
-                    db.Categories.Remove(cat);
-                    db.SaveChanges();
-                    if (!Helper.DoesCategoryExist(db.Categories.FirstOrDefault(c => c.Id == categoryId)))
+                    var cat = db.Categories.Include(b => b.Books).FirstOrDefault(c => c.Id == categoryId);
+
+                    if (cat != null && cat.Books.Count() <= 0)
                     {
-                        Console.WriteLine($"You have deleted category {cat.Name}");
-                        return true;
+                        db.Categories.Remove(cat);
+                        db.SaveChanges();
+                        if (!Helper.DoesCategoryExist(db.Categories.FirstOrDefault(c => c.Id == categoryId)))
+                        {
+                            Console.WriteLine($"You have deleted category {cat.Name}");
+                            return true;
+                        }
                     }
+                    return View.SomethingWentWrong();
                 }
+                return View.SomethingWentWrong(); ;
+            }
+            catch (Exception)
+            {
                 return View.SomethingWentWrong();
             }
-            return false;
         }
 
         /// <summary>
@@ -268,11 +319,20 @@ namespace Inlamn2WebbShop_MLarsson
         /// <returns>Lista på användare</returns>
         public static List<User> FindUser(int adminId, string keyword)
         {
-            if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
+            try
             {
-                return db.Users.Include(s => s.SoldBooks).Where(u => u.Name.Contains(keyword)).OrderBy(o => o.Name).ToList();
+                if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
+                {
+                    return db.Users.Include(s => s.SoldBooks).Where(u => u.Name.Contains(keyword)).OrderBy(o => o.Name).ToList();
+                }
+                return null;
             }
-            return null;
+            catch (Exception)
+            {
+
+                return null;
+
+            }
         }
 
         /// <summary>
@@ -283,7 +343,14 @@ namespace Inlamn2WebbShop_MLarsson
         /// <returns>Lista på böcker</returns>
         public static List<Book> GetAuthors(string keyword)
         {
-            return db.Books.Include(c=>c.Categories).Where(b => b.Author.Contains(keyword)).OrderBy(a => a.Author).ToList();
+            try
+            {
+                return db.Books.Include(c => c.Categories).Where(b => b.Author.Contains(keyword)).OrderBy(a => a.Author).ToList();
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
         /// <summary>
@@ -293,15 +360,22 @@ namespace Inlamn2WebbShop_MLarsson
         /// <param name="categoryId"></param>
         public static List<Book> GetAvailableBooks(int categoryId)
         {
-            List<Book> books = new List<Book>();
-            foreach (var cat in db.Categories.Include(b=>b.Books).Where(c => c.Id == categoryId))
+            try
             {
-                foreach (var book in cat.Books.Where(b => b.Amount > 0))
+                List<Book> books = new List<Book>();
+                foreach (var cat in db.Categories.Include(b => b.Books).Where(c => c.Id == categoryId))
                 {
-                    books.Add(book);
+                    foreach (var book in cat.Books.Where(b => b.Amount > 0))
+                    {
+                        books.Add(book);
+                    }
                 }
+                return books;
             }
-            return books;
+            catch (Exception)
+            {
+                return null;
+            }
 
         }
         /// <summary>
@@ -311,7 +385,14 @@ namespace Inlamn2WebbShop_MLarsson
         /// <returns>ett Book object. </returns>
         public static Book GetBook(int bookId)
         {
-            return db.Books.Include(c=>c.Categories).FirstOrDefault(b => b.Id == bookId);
+            try
+            {
+                return db.Books.Include(c => c.Categories).FirstOrDefault(b => b.Id == bookId);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
         /// <summary>
@@ -321,7 +402,15 @@ namespace Inlamn2WebbShop_MLarsson
         /// <returns>En lista med böcker.</returns>
         public static List<Book> GetBooks(string keyword)
         {
-            return db.Books.Include(c => c.Categories).Where(b => b.Title.Contains(keyword)).OrderBy(o => o.Title).ToList();
+            try
+            {
+                return db.Books.Include(c => c.Categories).Where(b => b.Title.Contains(keyword)).OrderBy(o => o.Title).ToList();
+            }
+            catch (Exception)
+            {
+
+                return null;
+            }
         }
 
         /// <summary>
@@ -331,7 +420,14 @@ namespace Inlamn2WebbShop_MLarsson
         /// <returns>En lista med kategorier</returns>
         public static List<Category> GetCategories(string keyword)
         {
-            return db.Categories.Where(c => c.Name.Contains(keyword)).OrderBy(c => c.Name).ToList();
+            try
+            {
+                return db.Categories.Where(c => c.Name.Contains(keyword)).OrderBy(c => c.Name).ToList();
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
         /// <summary>
@@ -340,7 +436,14 @@ namespace Inlamn2WebbShop_MLarsson
         /// <returns>En lista med kategorier</returns>
         public static List<Category> GetCategories()
         {
-            return db.Categories.OrderBy(c => c.Name).ToList();
+            try
+            {
+                return db.Categories.OrderBy(c => c.Name).ToList();
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
         /// <summary>
@@ -348,15 +451,22 @@ namespace Inlamn2WebbShop_MLarsson
         /// </summary>
         /// <param name="categoryId"></param>
         /// <returns>Lista på böcker i en kategori</returns>
-        public static List<Book> GetCategory(int categoryId) 
+        public static List<Book> GetCategory(int categoryId)
         {
-            List<Book> bookList = new List<Book>();
-            var catList = db.Categories.Include(b => b.Books).FirstOrDefault(c=>c.Id== categoryId);
-            foreach(var book in catList.Books)
+            try
             {
-                bookList.Add(book);
+                List<Book> bookList = new List<Book>();
+                var catList = db.Categories.Include(b => b.Books).FirstOrDefault(c => c.Id == categoryId);
+                foreach (var book in catList.Books)
+                {
+                    bookList.Add(book);
+                }
+                return bookList;
             }
-            return bookList;
+            catch (Exception)
+            {
+                return null;
+            }
         }
         /// <summary>
         /// Tittar om användare är admin,
@@ -366,10 +476,17 @@ namespace Inlamn2WebbShop_MLarsson
         /// <returns>Lista på användare</returns>
         public static List<User> ListUsers(int adminId)
         {
-            var userList = new List<User>();
-            if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
+            try
             {
-                return db.Users.OrderBy(u => u.Name).ToList();
+                var userList = new List<User>();
+                if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
+                {
+                    return db.Users.OrderBy(u => u.Name).ToList();
+                }
+            }
+            catch (Exception)
+            {
+                return null;
             }
             return null;
         }
@@ -382,17 +499,25 @@ namespace Inlamn2WebbShop_MLarsson
         /// <returns>Användar-id. 0 om ingen användare finns.</returns>
         public static int LogInUser(string userName, string password)
         {
-            var user = db.Users.FirstOrDefault(u => u.Name == userName.Trim() && u.Password == password && u.IsActive == true);
-            if (user != null)
+            try
             {
-                user.LastLogin = DateTime.Now;
-                user.SessionTimer = DateTime.Now;
-                db.Users.Update(user);
-                db.SaveChanges();
-                Console.WriteLine("\nYou have successfully logged in.");
-                return user.Id;
+                var user = db.Users.FirstOrDefault(u => u.Name == userName.Trim() && u.Password == password && u.IsActive == true);
+                if (user != null)
+                {
+                    user.LastLogin = DateTime.Now;
+                    user.SessionTimer = DateTime.Now;
+                    db.Users.Update(user);
+                    db.SaveChanges();
+                    View.LogInLogOut("login");
+                    return user.Id;
+                }
+                View.SomethingWentWrong();    
+                return 0;
             }
-            return 0;
+            catch (Exception)
+            {
+                return 0;
+            }
         }
 
         /// <summary>
@@ -401,13 +526,20 @@ namespace Inlamn2WebbShop_MLarsson
         /// <param name="id"></param>
         public static void LogOutUser(int id)
         {
-            var user = db.Users.FirstOrDefault(u => u.Id == id && u.SessionTimer > DateTime.Now.AddMinutes(-10));
-            if (user != null)
+            try
             {
-                user.SessionTimer = DateTime.MinValue;
-                db.Users.Update(user);
-                db.SaveChanges();
-                Console.WriteLine("\nYou have successfully logged out. Welcome back.");
+                var user = db.Users.FirstOrDefault(u => u.Id == id && u.SessionTimer > DateTime.Now.AddMinutes(-10));
+                if (user != null)
+                {
+                    user.SessionTimer = DateTime.MinValue;
+                    db.Users.Update(user);
+                    db.SaveChanges();
+                    View.LogInLogOut("logout");
+                }
+            }
+            catch (Exception)
+            {
+                View.SomethingWentWrong();
             }
         }
         /// <summary>
@@ -417,15 +549,24 @@ namespace Inlamn2WebbShop_MLarsson
         /// <returns>"Pong" om användaren är inloggad, annars string.Empty/returns>
         public static string Ping(int userId)
         {
-            var user = db.Users.FirstOrDefault(u => u.Id == userId);
-            if (user.SessionTimer! > DateTime.Now.AddMinutes(-10))
+            try
             {
-                return "\nPong\n";
+                var user = db.Users.FirstOrDefault(u => u.Id == userId);
+                if (user.SessionTimer! > DateTime.Now.AddMinutes(-10))
+                {
+                    return "\nPong\n";
+                }
+                else
+                {
+                    return string.Empty;
+                }
             }
-            else
+            catch (Exception)
             {
+                View.SomethingWentWrong();
                 return string.Empty;
             }
+
         }
 
         /// <summary>
@@ -438,30 +579,31 @@ namespace Inlamn2WebbShop_MLarsson
         public static bool Register(string name, string password, string passwordVerify)
         {
             Console.WriteLine();
-            if (password != passwordVerify)
+            try
             {
-                Console.WriteLine("Please check your password. Your passwords are not equal.");
-                return false;
-            }
+                if (password != passwordVerify)
+                {
+                    return View.Register("password");
+                }
 
-            if (Helper.DoesUserExist(db.Users.FirstOrDefault(u => u.Name == name.Trim())))
-            {
-                Console.WriteLine("User already exists! Try another user name.");
-                return false;
-            }
-            else
-            {
-                db.Users.Add(new User() { Name = name.Trim(), Password = password, IsActive = true, IsAdmin = false, SoldBooks = new List<SoldBook>() });
-                db.SaveChanges();
                 if (Helper.DoesUserExist(db.Users.FirstOrDefault(u => u.Name == name.Trim())))
                 {
-                    Console.WriteLine("You are now registred in our shop. Please login to start buying books.");
-                    return true;
+                    return View.Register("name");
                 }
                 else
                 {
+                    db.Users.Add(new User() { Name = name.Trim(), Password = password, IsActive = true, IsAdmin = false, SoldBooks = new List<SoldBook>() });
+                    db.SaveChanges();
+                    if (Helper.DoesUserExist(db.Users.FirstOrDefault(u => u.Name == name.Trim())))
+                    {
+                        return View.Register("new");
+                    }
                     return View.SomethingWentWrong();
                 }
+            }
+            catch (Exception)
+            {
+                return View.SomethingWentWrong();
             }
         }
         /// <summary>
@@ -473,19 +615,27 @@ namespace Inlamn2WebbShop_MLarsson
         public static void SetAmount(int adminId, int bookId, int amount)
         {
             var book = db.Books.FirstOrDefault(b => b.Id == bookId);
-            if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
+            try
             {
-                if (book != null)
+                if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
                 {
-                    book.Amount += amount;
-                    Console.WriteLine($"The book stock is refilled with {amount} books.");
-                    db.SaveChanges();
-                }
-                else
-                {
-                    Console.WriteLine("No book was found...");
+                    if (book != null)
+                    {
+                        book.Amount += amount;
+                        View.SetAmount(amount); 
+                        db.SaveChanges();
+                    }
+                    else
+                    {
+                        View.SetAmount(amount=0);
+                    }
                 }
             }
+            catch (Exception)
+            {
+                View.SomethingWentWrong();
+            }
+
         }
 
         /// <summary>
@@ -499,25 +649,32 @@ namespace Inlamn2WebbShop_MLarsson
         /// <returns>true om boken är uppdaterad, annars false</returns>
         public static bool UpdateBook(int adminId, int bookId, string title = "", string author = "", int price = 0)
         {
-            if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
+            try
             {
-                var book = db.Books.FirstOrDefault(b => b.Id == bookId);
-                if (book != null)
+                if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
                 {
-                    if (title != "") book.Title = title;
-                    if (author != "") book.Author = author;
-                    if (price != 0) book.Price = price;
-                    db.Update(book);
-                    db.SaveChanges();
-                    Console.WriteLine("You have updated a book.");
-                    return true;
-                }
-                else
-                {
-                    return View.SomethingWentWrong();
+                    var book = db.Books.FirstOrDefault(b => b.Id == bookId);
+                    if (book != null)
+                    {
+                        if (title != "") book.Title = title;
+                        if (author != "") book.Author = author;
+                        if (price != 0) book.Price = price;
+                        db.Update(book);
+                        db.SaveChanges();
+                        Console.WriteLine("You have updated a book.");
+                        return true;
+                    }
+                    else
+                    {
+                        return View.SomethingWentWrong();
+                    }
                 }
             }
-            return false;
+            catch (Exception)
+            {
+                return View.SomethingWentWrong();
+            }
+            return View.SomethingWentWrong();
         }
         /// <summary>
         /// Kollar om användare är admin, byter namn på kategori om id finns.
@@ -528,25 +685,31 @@ namespace Inlamn2WebbShop_MLarsson
         /// <returns>true om namnet är ändrat, annars false.</returns>
         public static bool UpdateCategory(int adminId, int categoryId, string newName)
         {
-            if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
+            try
             {
-                var cat = db.Categories.FirstOrDefault(c => c.Id == categoryId);
-                if (cat != null)
+                if (Helper.CheckIfAdmin(db.Users.FirstOrDefault(a => a.Id == adminId)))
                 {
-                    cat.Name = newName;
-                    db.Update(cat);
-                    db.SaveChanges();
-                    if (Helper.DoesCategoryExist(db.Categories.FirstOrDefault(c => c.Name == newName && c.Id == categoryId)))
+                    var cat = db.Categories.FirstOrDefault(c => c.Id == categoryId);
+                    if (cat != null)
                     {
-                        Console.WriteLine("You have updated a category.");
-                        return true;
+                        cat.Name = newName;
+                        db.Update(cat);
+                        db.SaveChanges();
+                        if (Helper.DoesCategoryExist(db.Categories.FirstOrDefault(c => c.Name == newName && c.Id == categoryId)))
+                        {
+                            Console.WriteLine("You have updated a category.");
+                            return true;
+                        }
                     }
+                    return View.SomethingWentWrong();
                 }
-                return View.SomethingWentWrong();
-
             }
-            return false;
+            catch (Exception)
+            {
 
+                return View.SomethingWentWrong();
+            }
+            return View.SomethingWentWrong();
         }
     }
 }

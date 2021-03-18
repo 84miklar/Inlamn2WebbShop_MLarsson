@@ -4,14 +4,16 @@ using Inlamn2WebbShop_MLarsson.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Inlamn2WebbShop_MLarsson.Migrations
 {
     [DbContext(typeof(WebbShopContext))]
-    partial class MyDatabaseModelSnapshot : ModelSnapshot
+    [Migration("20210318081032_addedRequired")]
+    partial class addedRequired
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

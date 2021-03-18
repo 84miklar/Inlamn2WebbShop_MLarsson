@@ -13,7 +13,9 @@ namespace Inlamn2WebbShop_MLarsson.Models
 
         [Key]
         public int Id { get; set; }
+        [Required]
         public string Name { get; set; }
+        [Required]
         public string Password { get; set; }
         public DateTime LastLogin { get; set; }
         public DateTime SessionTimer { get; set; }
