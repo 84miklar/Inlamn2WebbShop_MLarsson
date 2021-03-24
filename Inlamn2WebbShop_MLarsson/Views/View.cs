@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Inlamn2WebbShop_MLarsson.Views
 {
-   public static class View
+    public static class View
     {
         /// <summary>
         /// Öpnnar en koppling till databasen, för att kunna använda i hela klassen.
@@ -168,9 +168,16 @@ namespace Inlamn2WebbShop_MLarsson.Views
         public static void ListCategories(List<Category> categories)
         {
             Console.WriteLine("\nCATEGORIES: ");
-            foreach (var cat in categories)
+            try
             {
-                Console.WriteLine(cat.Name);
+                foreach (var cat in categories)
+                {
+                    Console.WriteLine(cat.Name);
+                }
+            }
+            catch
+            {
+                Console.WriteLine("No categories found...");
             }
             Console.WriteLine();
         }
@@ -182,14 +189,20 @@ namespace Inlamn2WebbShop_MLarsson.Views
         public static void ListCategory(List<Book> books)
         {
             Console.WriteLine($"\nBOOKS IN CATEGORY: ");
-
-            foreach (var book in books)
+            try
             {
-
-                foreach (var cat in book.Categories)
+                foreach (var book in books)
                 {
-                    Console.WriteLine($"{cat.Name} - {book.Title}");
+
+                    foreach (var cat in book.Categories)
+                    {
+                        Console.WriteLine($"{cat.Name} - {book.Title}");
+                    }
                 }
+            }
+            catch
+            {
+                Console.WriteLine("No books found...");
             }
             Console.WriteLine();
         }
@@ -201,15 +214,23 @@ namespace Inlamn2WebbShop_MLarsson.Views
         public static void ListUser(User user)
         {
             Console.WriteLine("USER: ");
-            Console.WriteLine($"ID: {user.Id} - {user.Name}");
-            if (user.SoldBooks != null)
+
+            try
             {
-                Console.Write($"Books bought: ");
-                foreach (var soldBook in user.SoldBooks)
+                Console.WriteLine($"ID: {user.Id} - {user.Name}");
+                if (user.SoldBooks != null)
                 {
-                    Console.Write($"{soldBook.Title}, ");
+                    Console.Write($"Books bought: ");
+                    foreach (var soldBook in user.SoldBooks)
+                    {
+                        Console.Write($"{soldBook.Title}, ");
+                    }
+                    Console.WriteLine();
                 }
-                Console.WriteLine();
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("No user found...");
             }
 
         }
@@ -220,19 +241,26 @@ namespace Inlamn2WebbShop_MLarsson.Views
         public static void ListUsers(List<User> userList)
         {
             Console.WriteLine();
-            foreach (var user in userList)
+            try
             {
-                Console.WriteLine("\nUSER: ");
-                Console.WriteLine(user);
-                if (user.SoldBooks != null)
+                foreach (var user in userList)
                 {
-                    Console.Write($"Books bought: ");
-                    foreach (var soldBook in user.SoldBooks)
+                    Console.WriteLine("\nUSER: ");
+                    Console.WriteLine(user);
+                    if (user.SoldBooks != null)
                     {
-                        Console.WriteLine($"{soldBook.Title}, ");
+                        Console.Write($"Books bought: ");
+                        foreach (var soldBook in user.SoldBooks)
+                        {
+                            Console.WriteLine($"{soldBook.Title}, ");
+                        }
+                        Console.WriteLine();
                     }
-                    Console.WriteLine();
                 }
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("No user found...");
             }
         }
 

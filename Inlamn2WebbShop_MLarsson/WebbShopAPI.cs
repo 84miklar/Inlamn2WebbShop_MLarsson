@@ -152,7 +152,7 @@ namespace Inlamn2WebbShop_MLarsson
         /// <param name="name"></param>
         /// <param name="password"></param>
         /// <returns>true om ny användare är tillagd, annars false</returns>
-        public static bool AddUser(int adminId, string name, string password="Codic2021")
+        public static bool AddUser(int adminId, string name, string password = "Codic2021")
         {
             try
             {
@@ -222,7 +222,7 @@ namespace Inlamn2WebbShop_MLarsson
                     db.SoldBooks.Add(soldBook);
                     db.Update(user);
                     db.SaveChanges();
-                    View.BuyBook(soldBook.Title); 
+                    View.BuyBook(soldBook.Title);
                     return user;
                 }
                 View.SomethingWentWrong();
@@ -361,9 +361,12 @@ namespace Inlamn2WebbShop_MLarsson
                 List<Book> books = new List<Book>();
                 foreach (var cat in db.Categories.Include(b => b.Books).Where(c => c.Id == categoryId))
                 {
-                    foreach (var book in cat.Books.Where(b => b.Amount > 0))
+                    if (cat != null)
                     {
-                        books.Add(book);
+                        foreach (var book in cat.Books.Where(b => b.Amount > 0))
+                        {
+                            books.Add(book);
+                        }
                     }
                 }
                 return books;
@@ -449,15 +452,19 @@ namespace Inlamn2WebbShop_MLarsson
         /// <returns>Lista på böcker i en kategori</returns>
         public static List<Book> GetCategory(int categoryId)
         {
+            List<Book> bookList = new List<Book>();
+            var catList = db.Categories.Include(b => b.Books).FirstOrDefault(c => c.Id == categoryId);
             try
             {
-                List<Book> bookList = new List<Book>();
-                var catList = db.Categories.Include(b => b.Books).FirstOrDefault(c => c.Id == categoryId);
-                foreach (var book in catList.Books)
+                if (catList != null)
                 {
-                    bookList.Add(book);
+                    foreach (var book in catList.Books)
+                    {
+                        bookList.Add(book);
+                    }
+                    return bookList;
                 }
-                return bookList;
+                return null;
             }
             catch (Exception)
             {
@@ -507,7 +514,7 @@ namespace Inlamn2WebbShop_MLarsson
                     View.LogInLogOut("login");
                     return user.Id;
                 }
-                View.SomethingWentWrong();    
+                View.SomethingWentWrong();
                 return 0;
             }
             catch (Exception)
@@ -577,7 +584,7 @@ namespace Inlamn2WebbShop_MLarsson
             Console.WriteLine();
             try
             {
-                if (password != passwordVerify && password.Length>3)
+                if (password != passwordVerify && password.Length > 3)
                 {
                     return View.Register("password");
                 }
@@ -618,12 +625,12 @@ namespace Inlamn2WebbShop_MLarsson
                     if (book != null)
                     {
                         book.Amount += amount;
-                        View.SetAmount(amount); 
+                        View.SetAmount(amount);
                         db.SaveChanges();
                     }
                     else
                     {
-                        View.SetAmount(amount=0);
+                        View.SetAmount(amount = 0);
                     }
                 }
             }
