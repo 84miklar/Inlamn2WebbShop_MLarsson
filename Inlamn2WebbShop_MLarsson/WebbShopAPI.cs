@@ -555,7 +555,8 @@ namespace Inlamn2WebbShop_MLarsson
             try
             {
                 var user = db.Users.FirstOrDefault(u => u.Id == userId);
-                if (user.SessionTimer! > DateTime.Now.AddMinutes(-10))
+                
+                if (user!=null && user.SessionTimer! > DateTime.Now.AddMinutes(-10))
                 {
                     return "\nPong\n";
                 }

@@ -13,7 +13,7 @@ namespace Inlamn2WebbShop_MLarsson
             DatabaseCreator.Create();
             Seeder.Seed();
 
-
+/*
             //Testa alla metoder, tryck enter mellan varje "Go".
             #region Go1-User
             //#1 Logga in 
@@ -227,7 +227,7 @@ namespace Inlamn2WebbShop_MLarsson
             Console.WriteLine("#43");
             //Logga ut användare.
             WebbShopAPI.LogOutUser(adminId);
-            #endregion Go5-Admin
+            #endregion Go5-Admin*/
         }
     }
 }
