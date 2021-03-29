@@ -225,8 +225,11 @@ namespace Inlamn2WebbShop_MLarsson
                     View.BuyBook(soldBook.Title);
                     return user;
                 }
-                View.SomethingWentWrong();
-                return null;
+                else
+                {
+                    View.SomethingWentWrong();
+                    return null;
+                }
             }
             catch (Exception)
             {
@@ -298,7 +301,7 @@ namespace Inlamn2WebbShop_MLarsson
                     }
                     return View.SomethingWentWrong();
                 }
-                return View.SomethingWentWrong(); ;
+                return View.SomethingWentWrong(); 
             }
             catch (Exception)
             {
@@ -325,9 +328,7 @@ namespace Inlamn2WebbShop_MLarsson
             }
             catch (Exception)
             {
-
                 return null;
-
             }
         }
 
@@ -500,7 +501,7 @@ namespace Inlamn2WebbShop_MLarsson
         /// <param name="userName"></param>
         /// <param name="password"></param>
         /// <returns>Användar-id. 0 om ingen användare finns.</returns>
-        public static int LogInUser(string userName, string password)
+        public static User LogInUser(string userName, string password)
         {
             try
             {
@@ -512,14 +513,14 @@ namespace Inlamn2WebbShop_MLarsson
                     db.Users.Update(user);
                     db.SaveChanges();
                     View.LogInLogOut("login");
-                    return user.Id;
+                    return user;
                 }
                 View.SomethingWentWrong();
-                return 0;
+                return null;
             }
             catch (Exception)
             {
-                return 0;
+                return null;
             }
         }
 
@@ -555,10 +556,10 @@ namespace Inlamn2WebbShop_MLarsson
             try
             {
                 var user = db.Users.FirstOrDefault(u => u.Id == userId);
-                
-                if (user!=null && user.SessionTimer! > DateTime.Now.AddMinutes(-10))
+
+                if (user != null && user.SessionTimer! > DateTime.Now.AddMinutes(-10))
                 {
-                    return "\nPong\n";
+                    return "Pong";
                 }
                 else
                 {

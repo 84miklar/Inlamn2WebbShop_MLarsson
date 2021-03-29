@@ -40,7 +40,10 @@ namespace Inlamn2WebbShop_MLarsson
                             return View.ActiveInactive("active", user.Name);
                         }
                     }
-                    return View.SomethingWentWrong();
+                    else
+                    {
+                        return View.SomethingWentWrong();
+                    }
                 }
                 return View.SomethingWentWrong();
             }
@@ -62,7 +65,7 @@ namespace Inlamn2WebbShop_MLarsson
                 {
                     var customer = db.Users.Include(s => s.SoldBooks).OrderByDescending(b => b.SoldBooks.Count()).FirstOrDefault();
 
-                    View.BestCustomer(customer.SoldBooks.Count()); 
+                    View.BestCustomer(customer.SoldBooks.Count());
                     return customer;
                 }
                 return null;
@@ -72,7 +75,7 @@ namespace Inlamn2WebbShop_MLarsson
                 return null;
             }
         }
-       
+
         /// <summary>
         /// Gör en administratör till vanlig användare.
         /// </summary>
@@ -93,10 +96,13 @@ namespace Inlamn2WebbShop_MLarsson
                         db.SaveChanges();
                         if (Helper.DoesUserExist(db.Users.FirstOrDefault(u => u.Id == userId && u.IsAdmin == false)))
                         {
-                            return View.DemotePromote("demote",user.Name); 
+                            return View.DemotePromote("demote", user.Name);
                         }
                     }
-                    return View.SomethingWentWrong();
+                    else
+                    {
+                        return View.SomethingWentWrong();
+                    }
                 }
                 return View.SomethingWentWrong();
             }
@@ -128,7 +134,10 @@ namespace Inlamn2WebbShop_MLarsson
                             return View.ActiveInactive("Inactive", user.Name);
                         }
                     }
-                    return View.SomethingWentWrong();
+                    else
+                    {
+                        return View.SomethingWentWrong();
+                    }
                 }
                 return View.SomethingWentWrong();
             }
@@ -142,7 +151,7 @@ namespace Inlamn2WebbShop_MLarsson
         /// Visar totalsumman av alla sålda böcker.
         /// </summary>
         /// <param name="adminId"></param>
-        public static void MoneyEarned(int adminId) 
+        public static void MoneyEarned(int adminId)
         {
             try
             {
@@ -158,9 +167,12 @@ namespace Inlamn2WebbShop_MLarsson
 
                     var totalSum = db.SoldBooks.Sum(p => p.Price);
                     View.MoneyEarned(totalSum);
-                    foreach (var book in bestBook)
+                    if (bestBook != null)
                     {
-                        View.MoneyEarned(book.Title, book.BookSum);
+                        foreach (var book in bestBook)
+                        {
+                            View.MoneyEarned(book.Title, book.BookSum);
+                        }
                     }
                 }
             }
@@ -192,7 +204,10 @@ namespace Inlamn2WebbShop_MLarsson
                             return View.DemotePromote("promote", user.Name);
                         }
                     }
-                    return View.SomethingWentWrong();
+                    else
+                    {
+                        return View.SomethingWentWrong();
+                    }
                 }
                 return View.SomethingWentWrong();
             }
