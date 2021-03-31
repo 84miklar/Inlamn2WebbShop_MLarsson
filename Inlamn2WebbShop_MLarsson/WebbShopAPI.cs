@@ -68,7 +68,7 @@ namespace Inlamn2WebbShop_MLarsson
         }
 
         /// <summary>
-        /// tittar om användare är admin, lägger till bok i kategori, 
+        /// tittar om användare är admin, lägger till bok i kategori,
         /// eller skapar kategori och sedan lägger till.
         /// </summary>
         /// <param name="adminId"></param>
@@ -177,7 +177,6 @@ namespace Inlamn2WebbShop_MLarsson
             }
             catch (Exception)
             {
-
                 return View.SomethingWentWrong();
             }
         }
@@ -196,7 +195,7 @@ namespace Inlamn2WebbShop_MLarsson
             try
             {
                 if (user != null && user.SessionTimer! > DateTime.Now.AddMinutes(-10)
-                    && book != null && book.Amount > 0)
+                    && book?.Amount > 0)
                 {
                     user.SessionTimer = DateTime.Now;
                     book.Amount--;
@@ -235,7 +234,6 @@ namespace Inlamn2WebbShop_MLarsson
             {
                 return null;
             }
-
         }
 
         /// <summary>
@@ -289,7 +287,7 @@ namespace Inlamn2WebbShop_MLarsson
                 {
                     var cat = db.Categories.Include(b => b.Books).FirstOrDefault(c => c.Id == categoryId);
 
-                    if (cat != null && cat.Books.Count() <= 0)
+                    if (cat?.Books.Count() <= 0)
                     {
                         db.Categories.Remove(cat);
                         db.SaveChanges();
@@ -301,7 +299,7 @@ namespace Inlamn2WebbShop_MLarsson
                     }
                     return View.SomethingWentWrong();
                 }
-                return View.SomethingWentWrong(); 
+                return View.SomethingWentWrong();
             }
             catch (Exception)
             {
@@ -310,7 +308,7 @@ namespace Inlamn2WebbShop_MLarsson
         }
 
         /// <summary>
-        /// Tittar om användare är admin, 
+        /// Tittar om användare är admin,
         /// och listar alla användare som har keyword in sitt namn.
         /// </summary>
         /// <param name="adminId"></param>
@@ -333,7 +331,7 @@ namespace Inlamn2WebbShop_MLarsson
         }
 
         /// <summary>
-        /// Hämtar böcker där författarens namn innenhåller 
+        /// Hämtar böcker där författarens namn innenhåller
         /// valt nyckelord.
         /// </summary>
         /// <param name="keyword"></param>
@@ -351,7 +349,7 @@ namespace Inlamn2WebbShop_MLarsson
         }
 
         /// <summary>
-        /// Hämtar böcker in en viss kategori baserad på kategori-id, 
+        /// Hämtar böcker in en viss kategori baserad på kategori-id,
         /// och antal böcker fler än 0.
         /// </summary>
         /// <param name="categoryId"></param>
@@ -376,7 +374,6 @@ namespace Inlamn2WebbShop_MLarsson
             {
                 return null;
             }
-
         }
         /// <summary>
         /// Hämtar en bok baserad på bok-id.
@@ -408,7 +405,6 @@ namespace Inlamn2WebbShop_MLarsson
             }
             catch (Exception)
             {
-
                 return null;
             }
         }
@@ -571,7 +567,6 @@ namespace Inlamn2WebbShop_MLarsson
                 View.SomethingWentWrong();
                 return string.Empty;
             }
-
         }
 
         /// <summary>
@@ -640,7 +635,6 @@ namespace Inlamn2WebbShop_MLarsson
             {
                 View.SomethingWentWrong();
             }
-
         }
 
         /// <summary>
@@ -711,7 +705,6 @@ namespace Inlamn2WebbShop_MLarsson
             }
             catch (Exception)
             {
-
                 return View.SomethingWentWrong();
             }
             return View.SomethingWentWrong();

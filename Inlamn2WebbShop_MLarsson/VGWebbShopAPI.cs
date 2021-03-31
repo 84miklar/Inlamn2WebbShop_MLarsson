@@ -94,7 +94,7 @@ namespace Inlamn2WebbShop_MLarsson
                     {
                         user.IsAdmin = false;
                         db.SaveChanges();
-                        if (Helper.DoesUserExist(db.Users.FirstOrDefault(u => u.Id == userId && u.IsAdmin == false)))
+                        if (Helper.DoesUserExist(db.Users.FirstOrDefault(u => u.Id == userId && !u.IsAdmin)))
                         {
                             return View.DemotePromote("demote", user.Name);
                         }
@@ -129,7 +129,7 @@ namespace Inlamn2WebbShop_MLarsson
                     {
                         user.IsActive = false;
                         db.SaveChanges();
-                        if (Helper.DoesUserExist(db.Users.FirstOrDefault(u => u.Id == userId && u.IsActive == false)))
+                        if (Helper.DoesUserExist(db.Users.FirstOrDefault(u => u.Id == userId && !u.IsActive)))
                         {
                             return View.ActiveInactive("Inactive", user.Name);
                         }

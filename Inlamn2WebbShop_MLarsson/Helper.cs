@@ -16,7 +16,7 @@ namespace Inlamn2WebbShop_MLarsson
         public static bool CheckIfAdmin(User user)
         {
             Console.WriteLine();
-            if (user!=null && user.IsAdmin)
+            if (user?.IsAdmin == true)
             {
                 return true;
             }
